@@ -1,0 +1,20 @@
+{
+    "title":"桌面便签",
+    "aboutmessage":"关于桌面便签",
+    "aboutdetail":"版本: 1.0.0\n使用 Vue 3 + TypeScript 构建\n功能: 创建、编辑、删除便签，标签分类，搜索等\n",
+    "menu.file": "文件",
+    "menu.file.open": "打开",
+    "menu.file.openRecent": "打开最近文件",
+    "menu.file.quit": "退出",
+    "menu.edit": "编辑",
+    "menu.edit.undo": "撤销",
+    "menu.edit.redo": "重做",
+    "menu.edit.cut": "剪切",
+    "menu.edit.copy": "复制",
+    "menu.edit.paste": "粘贴",
+    "menu.note":"便签",
+    "menu.newnote":"新建便签",
+    "menu.help": "帮助",
+    "menu.help.config": "配置",
+    "menu.help.about": "关于"
+}

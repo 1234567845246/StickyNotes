@@ -1,0 +1,20 @@
+{
+    "title":"Sticky Notes",
+    "aboutmessage":"About Sticky Notes",
+    "aboutdetail":"Version: 1.0.0\nBuilt with Vue 3 + TypeScript\nFeatures: Create, edit, delete notes, tag categorization, search, etc.",
+    "menu.file": "File",
+    "menu.file.open": "Open",
+    "menu.file.openRecent": "Open Recent",
+    "menu.file.quit": "Quit",
+    "menu.edit": "Edit",
+    "menu.edit.undo": "Undo",
+    "menu.edit.redo": "Redo",
+    "menu.edit.cut": "Cut",
+    "menu.edit.copy": "Copy",
+    "menu.edit.paste": "Paste",
+    "menu.note":"Note",
+    "menu.newnote":"New Note",
+    "menu.help": "Help",
+    "menu.help.config": "Config",
+    "menu.help.about": "About"
+}

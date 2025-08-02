@@ -1,0 +1,278 @@
+:root {
+  --baseColor-gray0: #ffffff;
+  --baseColor-gray1: #ededed;
+  --baseColor-gray2: #dedede;
+  --baseColor-gray3: #cccccc;
+  --baseColor-gray4: #999999;
+  --baseColor-gray5: #545454;
+  --baseColor-gray6: #333333;
+  --baseColor-gray7: #000000;
+
+  --button-primary: #269;
+  --button-primary-hover: #66b1ff;
+  --button-secondary: #f9aa33;
+  --button-secondary-hover: #fff9c4;
+  --button-about: var(--baseColor-gray1);
+  --button-aobut-foreground: var(--baseColor-gray4);
+  --button-about-hover: var(--baseColor-gray0);
+
+  --content-background: var(--baseColor-gray0);
+  --content-foreground: var(--baseColor-gray6);
+  --content-shadow: 0 8px 32px rgba(99, 102, 241, 0.06);
+
+  --aside-background: var(--baseColor-gray2);
+  --main-head-background: linear-gradient(135deg, #5e35b1, #3949ab);
+
+  --menu-background: var(--aside-background);
+  --menu-foregound: var(--baseColor-gray6);
+  --menu-title-background: #598dec;
+  --menu-hover-background: #bfbfbf;
+
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+   --borderColor:var(--baseColor-gray5);
+
+  --dialog-overlay-background: #ededed;
+  --dialog-background: #dedede;
+  --diglog-foreground: #333333;
+  --dialog-boxShadow: 0 0 10px rgb(0 0 0 / 0.3);
+  --dialog-borderColor: #545454;
+  --dialog-title-foreground: #ffffff;
+  --dialog-title-textShadow: 0 1px 0 hsl(0 0% 20%);
+  --dialog-close-foreground: #ffffff;
+  -dialog-close-activeBackground: #333333;
+
+  --select-border: #999999;
+  --select-svg-url-dropdown: url("data:image/svg+xml;utf8,<svg xmlns=%27http://www.w3.org/2000/svg%27 width=%277px%27 height=%273px%27><path fill=%27hsl%280 0%25 0%25%29%27 d=%27M0,0 L7,0 L3.5,3 L0,-0%27 /></svg>");
+  --select-foreground: #333333;
+  --select-hover-background: #ededed;
+
+  --button-border: #999999;
+  --button-color: #333333;
+  --button-hover-background: #ededed;
+
+}
+
+
+
+
+[data-theme="dark"] {
+  --baseColor-gray0: #1a1a1a;
+  --baseColor-gray1: #212121;
+  --baseColor-gray2: #161616;
+  --baseColor-gray3: #202020;
+  --baseColor-gray4: #666666;
+  --baseColor-gray5: #ababab;
+  --baseColor-gray6: #cccccc;
+  --baseColor-gray7: #ffffff;
+
+
+  --button-primary: #269;
+  --button-primary-hover: #66b1ff;
+  --button-secondary: #f9aa33;
+  --button-secondary-hover: #fff9c4;
+  --button-about: var(--baseColor-gray4);
+  --button-aobut-foreground: var(--baseColor-gray7);
+  --button-about-hover: var(--baseColor-gray5);
+
+
+  --content-background: var(--baseColor-gray0);
+  --content-foreground: var(--baseColor-gray6);
+  --content-shadow: 0 8px 32px rgba(30, 41, 59, 0.18);
+
+  --aside-background: var(--baseColor-gray2);
+
+  --main-head-background: linear-gradient(135deg, #311b92, #1a237e);
+
+  --menu-background: var(--aside-background);
+  --menu-foregound: var(--baseColor-gray6);
+  --menu-title-background: #ff5d5d;
+  --menu-hover-background: #454545;
+
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  --borderColor:var(--baseColor-gray4);
+
+  --dialog-overlay-background: #212121;
+  --dialog-background: #292929;
+  --diglog-foreground: #ababab;
+  --dialog-boxShadow: 0 0 40px 10px rgb(0 0 0 / 1);
+  --dialog-borderColor: #333333;
+  --dialog-title-foreground: #cccccc;
+  --dialog-title-textShadow: 0 1px 0 hsl(0 0% 10%);
+  --dialog-close-foreground: hsl(0 0% 80%);
+  -dialog-close-activeBackground: #666666;
+
+  --select-border: #666666;
+  --select-svg-url-dropdown: url("data:image/svg+xml;utf8,<svg xmlns=%27http://www.w3.org/2000/svg%27 width=%277px%27 height=%273px%27><path fill=%27hsl%280 0%25 80%25%29%27 d=%27M0,0 L7,0 L3.5,3 L0,-0%27 /></svg>");
+  --select-foreground: #cccccc;
+  --select-hover-background: #212121;
+
+  --button-border: #666666;
+  --button-color: #cccccc;
+  --button-hover-background: #212121;
+}
+
+body {
+  background: var(--content-background);
+  color: var(--content-foreground);
+  font-family: 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;
+  height: 100vh;
+  margin: 0;
+  transition: background 0.3s, color 0.3s;
+  user-select: none;
+  overflow-y: hidden;
+}
+
+#app {
+  height: 100%;
+}
+
+
+.select {
+  contain: strict;
+  display: block;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 28px;
+  padding: 3px 20px 3px 6px;
+  border: 1px solid var(--select-border);
+  border-radius: 4px;
+  background: var(--select-svg-url-dropdown) no-repeat right 7px center;
+  color: var(--select-foreground);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.select:focus,
+.select:not([disabled]):hover {
+  outline: 0;
+  background: var(--select-svg-url-dropdown) no-repeat right 7px center, var(--select-hover-background);
+  text-decoration: none;
+}
+
+.select option {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: normal;
+}
+
+.input {
+  contain: strict;
+  width: 100%;
+  height: 23px;
+  padding: 0 5px;
+  transition: background-color 200ms linear 40ms, color 200ms linear 40ms;
+  border: solid rgba(0, 0, 0, 0);
+  border-width: 1px 0;
+  border-radius: 0;
+  border-color: var(--baseColor-gray4);
+  background: inherit;
+  color: var(--baseColor-gray6);
+  font-family: inherit;
+  font-size: inherit;
+  line-height: 23px;
+}
+
+.input:focus {
+  border-color: var(--button-primary);
+  background: var(--baseColor-gray0) !important;
+  outline: none;
+}
+
+
+.button {
+  contain: content;
+  display: inline-block;
+  min-width: 80px;
+  padding: 0 10px;
+  overflow: hidden;
+  border: 1px solid var(--button-border);
+  color: var(--button-color);
+  border-radius: 4px;
+  outline: 0;
+  background-color:var(--baseColor-gray1);
+  font: inherit;
+  line-height: 28px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+
+
+
+.button:not([disabled]) {
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.button:not([disabled]):hover,
+.button:not([disabled]):focus {
+  background-color: var(--button-hover-background);
+}
+
+.primary_button {
+  border-color: var(--button-primary);
+  color: var(--button-primary);
+}
+
+.secondary_button {
+  border-color: var(--button-secondary);
+  color: var(--button-secondary);
+}
+
+.primary_button:hover {
+  background-color: var(--button-primary-hover) !important;
+}
+
+.secondary_button:hover {
+  background-color: var(--button-secondary-hover) !important;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+header {
+  background-color: var(--baseColor-gray4);
+  color: var(--content-foreground);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+  font-weight: 500;
+}
+
+
+
+main {
+  flex: 1;
+  padding: 2rem;
+}
+
+
+
+footer {
+  text-align: center;
+  padding: 1rem;
+  color: var(--baseColor-gray5);
+  font-size: 0.9rem;
+  border-top: 1px solid #eee;
+}
