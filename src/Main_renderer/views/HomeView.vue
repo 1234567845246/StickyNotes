@@ -170,7 +170,7 @@ async function readFileContent(multiple = false): Promise<string[] | null> {
     // 1. 打开文件选择器
     const fileHandles = await window.showOpenFilePicker({
       types: [{
-        description: 'JSON Files',
+        description: t('filterfile'),
         accept: {
           'application/json': ['.json']
         }
