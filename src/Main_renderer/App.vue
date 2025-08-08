@@ -1,14 +1,16 @@
 <template>
-  <router-view />
+  <!-- <router-view /> -->
+   <HomeView/>
   <ConfigPanel v-model="showConfig" @close="showConfig = false" />
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import ConfigPanel from "./components/ConfigPanel.vue";
+import HomeView from './views/HomeView.vue';
 
 import { useConfigStore } from "./store/store";
-import { RouterView } from 'vue-router';
+// import { RouterView } from 'vue-router';
 const showConfig = ref(false);
 
 

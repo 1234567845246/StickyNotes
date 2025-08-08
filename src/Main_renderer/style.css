@@ -29,7 +29,7 @@
   --menu-hover-background: #bfbfbf;
 
   --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-   --borderColor:var(--baseColor-gray5);
+  --borderColor: var(--baseColor-gray5);
 
   --dialog-overlay-background: #ededed;
   --dialog-background: #dedede;
@@ -50,6 +50,13 @@
   --button-color: #333333;
   --button-hover-background: #ededed;
 
+  --input-background: #ffffff;
+  --input-border-color: #d0d5dd;
+  --input-foreground: #101828;
+  --input-focus-border-color: #3b82f6;
+  --input-disabled-background: #98a2b3;
+  --input-disabled-foreground: #9ca3af;
+  --input-placeholder-foreground:#9ca3cf;
 }
 
 
@@ -89,7 +96,7 @@
   --menu-hover-background: #454545;
 
   --shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  --borderColor:var(--baseColor-gray4);
+  --borderColor: var(--baseColor-gray4);
 
   --dialog-overlay-background: #212121;
   --dialog-background: #292929;
@@ -109,6 +116,14 @@
   --button-border: #666666;
   --button-color: #cccccc;
   --button-hover-background: #212121;
+
+  --input-background: #1e293b;
+  --input-border-color: #334155;
+  --input-foreground: #f8fafc;
+  --input-focus-border-color: #60a5fa;
+  --input-disabled-background: #0f172a;
+  --input-disabled-foreground: #475569;
+  --input-placeholder-foreground:#64748b; 
 }
 
 body {
@@ -161,28 +176,30 @@ body {
 }
 
 .input {
-  contain: strict;
   width: 100%;
-  height: 23px;
-  padding: 0 5px;
-  transition: background-color 200ms linear 40ms, color 200ms linear 40ms;
-  border: solid rgba(0, 0, 0, 0);
-  border-width: 1px 0;
-  border-radius: 0;
-  border-color: var(--baseColor-gray4);
-  background: inherit;
-  color: var(--baseColor-gray6);
-  font-family: inherit;
-  font-size: inherit;
-  line-height: 23px;
+  padding: 10px 14px;
+  background-color: var(--input-background);
+  border: 1px solid var(--input-border-color);
+  color: var(--input-foreground);
+  transition:  border-color 200ms linear 40ms, color 200ms linear 40ms;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  font-size: 16px;
 }
 
 .input:focus {
-  border-color: var(--button-primary);
-  background: var(--baseColor-gray0) !important;
   outline: none;
+  border-color: var(--input-focus-border-color);
 }
 
+.input:disabled {
+  background-color: var(--input-disabled-background);
+  color: var(--input-disabled-foreground);
+  cursor: not-allowed;
+}
+.input::placeholder{
+  color: var(--input-placeholder-foreground);
+}
 
 .button {
   contain: content;
@@ -194,7 +211,7 @@ body {
   color: var(--button-color);
   border-radius: 4px;
   outline: 0;
-  background-color:var(--baseColor-gray1);
+  background-color: var(--baseColor-gray1);
   font: inherit;
   line-height: 28px;
   text-align: center;

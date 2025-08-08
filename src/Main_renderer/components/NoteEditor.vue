@@ -20,14 +20,15 @@
     </div>
 
     <div class="content-editor">
-      <MdEditor v-model="editedNote.content" :language="language" :theme="theme" :preview-theme="previewTheme" :toolbars="toolbars" >
+      <MdEditor v-model="editedNote.content" :language="language" :theme="theme" :preview-theme="previewTheme"
+        :toolbars="toolbars">
         <template #defToolbars>
           <Emoji>
             <template #trigger> Emoji </template>
           </Emoji>
-           <ThemeSwitch v-model="theme" />
-            <PreviewThemeSwitch v-model="previewTheme" />
-          
+          <ThemeSwitch v-model="theme" />
+          <PreviewThemeSwitch v-model="previewTheme" />
+
         </template>
       </MdEditor>
     </div>
@@ -55,12 +56,12 @@ import LimitInput from './LimitInput.vue';
 // import { useConfigStore } from '../store/store';
 
 import { Emoji, PreviewThemeSwitch, ThemeSwitch } from '@vavt/v3-extension';
-import { MdEditor, config , PreviewThemes,Themes ,ToolbarNames} from 'md-editor-v3';
+import { MdEditor, config, PreviewThemes, Themes, ToolbarNames } from 'md-editor-v3';
 // const useconfig = useConfigStore()
 
-let language = window.electronAPI.configurate().language === 'en'? 'en-US' : 'zh-CN';
+let language = window.electronAPI.configurate().language === 'en' ? 'en-US' : 'zh-CN';
 const previewTheme = ref<PreviewThemes>('default');
-const theme = ref<Themes>('light');
+const theme = ref<Themes>(document.body.getAttribute('data-theme') as 'light' | 'dark' );
 const toolbars: ToolbarNames[] = [
   'bold',
   'underline',
@@ -120,19 +121,19 @@ config({
   }
 })
 
-const observer = new MutationObserver((mutations:MutationRecord[])=>{
-    mutations.forEach(mutation=>{
-      if(mutation.type === 'attributes'){
-            let t = document.body.getAttribute('data-theme') as Themes
-          theme.value = t;
+const observer = new MutationObserver((mutations: MutationRecord[]) => {
+  mutations.forEach(mutation => {
+    if (mutation.type === 'attributes') {
+      let t = document.body.getAttribute('data-theme') as Themes
+      theme.value = t;
 
-      }
-    })
+    }
+  })
 })
 
-observer.observe(document.body,{
-  attributes:true,
-  attributeFilter:['data-theme']
+observer.observe(document.body, {
+  attributes: true,
+  attributeFilter: ['data-theme']
 })
 
 
@@ -166,7 +167,6 @@ const showTagSelector = ref(false);
 </script>
 <style lang="css" scoped>
 .note-editor {
-  background-color: var(--content-color);
   border-radius: 10px;
   box-shadow: var(--shadow);
   padding: 20px;

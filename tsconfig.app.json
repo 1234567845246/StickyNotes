@@ -2,6 +2,7 @@
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     /* Linting */
+    "types": [ "@types/wicg-file-system-access"],
     "strict": true,
     "esModuleInterop": true,
     "noUnusedLocals": true,

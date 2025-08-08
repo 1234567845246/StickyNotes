@@ -49,10 +49,10 @@
         <h3>{{ $t('datamanipulation') }}</h3>
         <ul class="sidebar-menu">
           <li @click="emit('export-data')">
-            <span class="icon">💾</span> {{ $t('import') }}
+            <span class="icon">💾</span> {{ $t('export') }}
           </li>
           <li @click="triggerImport">
-            <span class="icon">📥</span> {{ $t('export') }}
+            <span class="icon">📥</span> {{ $t('import') }}
           </li>
         </ul>
       </div>

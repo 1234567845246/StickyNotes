@@ -3,7 +3,7 @@
     <input
       ref="inputRef"
       type="text"
-      class="limited-input"
+      class="input limited-input"
       v-model="model"
       @input="handleInput"
       :placeholder="t('placeholder') + '...'" 
@@ -43,25 +43,16 @@ const displayCount = computed(()=>{
     width: 500px;
 }
 
-.limited-input {
-  width: 100%;
-  padding: 10px 70px 10px 12px;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  font-size: 14px;
-  transition: border-color 0.2s;
+.limited-input{
+  border-bottom-right-radius: 0px;
+  border-top-right-radius: 0px;
 }
 
-.limited-input:focus {
-  outline: none;
-  border-color: #409eff;
-  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
-}
 
 .counter {
-  color: #909399;
+  color: var(--input-foreground);
   font-size: 12px;
-  background: white;
+  background: var(--input-background);
   padding: 0 4px;
 }
 

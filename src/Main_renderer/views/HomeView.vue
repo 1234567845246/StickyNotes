@@ -4,30 +4,15 @@
     <div class="sidebar-wrapper" :class="{ 'sidebar-visible': showSidebar }">
       <Sidebar :show="showSidebar" @close="showSidebar = false" @create-note="createNewNote"
         @toggle-tag-manager="showTagManager = !showTagManager" @export-data="exportData" @import-data="importData"
-         @show-trash="showTrashView = true" />
+        @show-trash="showTrashView = true" />
     </div>
     <div class="main-content" :class="{ 'main-narrow': showSidebar }">
       <AppHeader @toggle-sidebar="showSidebar = !showSidebar" @create-note="createNewNote" />
       <div class="content-area">
-        <TrashView 
-          v-if="showTrashView"
-          @restore-note="restoreNoteFromTrash"
-          @delete-permanently="deleteNotePermanently"
-          @empty-trash="emptyTrash"
-          @close="showTrashView = false"
-        />
-        <NoteEditor
-          v-else-if="showEditor && selectedNote"
-          :note="selectedNote"
-          @save="saveNote"
-          @close="closeEditor"
-        />
-        <NoteList
-          v-else
-          @edit-note="editNote"
-          @delete-note="deleteNote"
-          @toggle-pin="togglePinNote"
-        />
+        <TrashView v-if="showTrashView" @restore-note="restoreNoteFromTrash" @delete-permanently="deleteNotePermanently"
+          @empty-trash="emptyTrash" @close="showTrashView = false" />
+        <NoteEditor v-else-if="showEditor && selectedNote" :note="selectedNote" @save="saveNote" @close="closeEditor" />
+        <NoteList v-else @edit-note="editNote" @delete-note="deleteNote" @toggle-pin="togglePinNote" />
       </div>
     </div>
 
@@ -50,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import {  onMounted, ref } from 'vue';
 import NoteList from '../components/NoteList.vue';
 import TagManager from '../components/TagManager.vue';
 import NoteEditor from '../components/NoteEditor.vue';
@@ -88,7 +73,7 @@ function createNewNote() {
     tags: [],
     color: getRandomColor(),
     pinned: false,
-    deleted:false,
+    deleted: false,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };
@@ -114,17 +99,17 @@ function saveNote(note: Note) {
 
 
 // 从回收站恢复
-function restoreNoteFromTrash  (noteId: string)  {
+function restoreNoteFromTrash(noteId: string) {
   noteStore.restoreFromTrash(noteId);
 };
 
 // 永久删除
-function deleteNotePermanently (noteId: string)  {
+function deleteNotePermanently(noteId: string) {
   noteStore.deletePermanently(noteId);
 };
 
 // 清空回收站
-function emptyTrash () {
+function emptyTrash() {
   noteStore.emptyTrash();
   showTrashView.value = false; // 关闭回收站视图
 };
@@ -150,24 +135,63 @@ function togglePinNote(noteId: string) {
 }
 
 
-function exportData() {
-  const data = JSON.stringify(noteStore.notes);
-  const blob = new Blob([data], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
+async function exportData() {
 
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `note-${new Date().toISOString().slice(0, 10)}.json`
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  const handle = await window.showSaveFilePicker({
+    suggestedName: `note-${new Date().toISOString().slice(0, 10)}.json`,
+    types: [{
+      description: t('filterfile'),
+      accept: {
+        'application/json': ['.json']
+      }
+    }]
+  })
+
+  const writableStream = await handle.createWritable();
+  await writableStream.write(JSON.stringify(noteStore.notes));
+  await writableStream.close();
+
 }
 
 // 导入数据
-function importData() {
-  console.log('errr');
+async function importData() {
+      console.log(await readFileContent())
 };
+
+/**
+ * 打开文件选择器并读取内容
+ * @param multiple 是否支持多选（默认 false）
+ * @returns 文件内容（文本）或 null（用户取消）
+ */
+async function readFileContent(multiple = false): Promise<string[] | null> {
+  try {
+
+
+    // 1. 打开文件选择器
+    const fileHandles = await window.showOpenFilePicker({
+      types: [{
+        description: 'JSON Files',
+        accept: {
+          'application/json': ['.json']
+        }
+      }],
+      excludeAcceptAllOption: true,
+      multiple: false
+    });
+
+    const contents = await Promise.all(
+      fileHandles.map(async (handle) => {
+        const file = await handle.getFile();
+        return file.text(); 
+      })
+    );
+
+    return multiple ? contents : [contents[0]];
+  } catch (err) {
+    console.error('读取文件失败:', err);
+    return null;
+  }
+}
 
 function getRandomColor() {
   const colors = ['#fff9c4', // 黄色
@@ -191,7 +215,6 @@ onMounted(() => {
 
 
 <style lang="css" scoped>
-
 .app-container {
   position: relative;
   height: 100vh;
@@ -205,9 +228,10 @@ onMounted(() => {
   width: 250px;
   height: 100%;
   z-index: 100;
-  transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+  transition: transform 0.3s cubic-bezier(.4, 0, .2, 1);
   transform: translateX(-250px);
 }
+
 .sidebar-visible {
   transform: translateX(0);
 }
@@ -221,8 +245,9 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  transition: left 0.3s cubic-bezier(.4,0,.2,1), width 0.3s cubic-bezier(.4,0,.2,1);
+  transition: left 0.3s cubic-bezier(.4, 0, .2, 1), width 0.3s cubic-bezier(.4, 0, .2, 1);
 }
+
 .main-narrow {
   left: 250px;
   width: calc(100% - 250px);
