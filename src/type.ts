@@ -1,10 +1,8 @@
 export const defaultconfig: Config = {
   theme: 'light',
   language: 'zh',
-  trashconfig:{
-      retentionDays:30,
-      autoClean:false,
-  },
+  retentionDays: 30,
+  autoClean: false,
   is8BitInteger: false,
   is16BitInteger: false,
   is32BitInteger: false,
@@ -30,7 +28,8 @@ export interface TrashConfig {
 export interface Config {
   theme: Theme;
   language: Language;
-  trashconfig:TrashConfig;
+  retentionDays: number; // 保留天数（默认30天）
+  autoClean: boolean;    // 是否自动清理
   is8BitInteger: boolean;
   is16BitInteger: boolean;
   is32BitInteger: boolean;
@@ -42,16 +41,16 @@ export interface Config {
   addressOffsetBase: NumberalBase;
   hideAddressOffsetLeadingZeros: boolean;
 }
-export interface Tag{
-  id:string;
-  name:string;
-  color:string;
-  createdAt:string; // 时间戳
-  updatedAt:string; // 时间戳
+export interface Tag {
+  id: string;
+  name: string;
+  color: string;
+  createdAt: string; // 时间戳
+  updatedAt: string; // 时间戳
 }
 
 
-export interface Note{
+export interface Note {
   id: string;
   title: string;
   tags: string[];
@@ -61,7 +60,7 @@ export interface Note{
   createdAt: string; // 时间戳
   updatedAt: string; // 时间戳
 
-    // 回收站相关的新增字段
+  // 回收站相关的新增字段
   deleted: boolean;        // 标记是否已被删除（在回收站中）
   deletedAt?: string;        // 删除时间（用于自动清理）
   originalPosition?: number; // 原始位置（用于恢复时还原位置）
@@ -74,7 +73,7 @@ export interface TrashAction {
   timestamp: Date;
 }
 
-export interface TagState{
+export interface TagState {
   tags: Tag[];
   selectedTag: string | null; // 当前选中的标签ID
 }

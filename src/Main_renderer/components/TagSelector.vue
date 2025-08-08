@@ -1,7 +1,7 @@
 <template>
     <CustomDialog v-model="props.modelValue">
         <template #title>
-            <span>{{ t('config.title') }}</span>
+            <span>{{ t('selecttag') }}</span>
         </template>
         <div class="tags-grid">
             <div v-for="tag in avaliableTags" :key="tag.id" class="tag-option" :style="{ backgroundColor: tag.color }"
@@ -9,7 +9,7 @@
                 {{ tag.name }}
             </div>
         </div>
-        <button @click="createNewTag" class="new-tag-btn"></button>
+        <button @click="createNewTag" class="button">{{ t('addtag') }}</button>
     </CustomDialog>
 
 </template>
@@ -39,6 +39,7 @@ const avaliableTags = computed(() => {
 //添加标签
 function addTag(tagId: string) {
     emit('add', tagId);
+    emit('close');
 }
 
 //创建新标签
@@ -81,19 +82,4 @@ function createNewTag() {
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
 }
 
-.new-tag-btn {
-    background-color: #f5f5f5;
-    border: none;
-    padding: 12px;
-    font-weight: 500;
-    color: #666;
-    cursor: pointer;
-    transition: all 0.2s;
-    border-top: 1px solid #eee;
-}
-
-.new-tag-btn:hover {
-    background-color: #e0e0e0;
-    color: #333;
-}
 </style>

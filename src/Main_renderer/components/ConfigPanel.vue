@@ -1,5 +1,5 @@
 <template>
-  <CustomDialog v-model="props.modelValue"  @close="closConfigPanel()">
+  <CustomDialog v-model="props.modelValue" @close="closConfigPanel()">
     <template #title>
       <span>{{ t('config.title') }}</span>
     </template>
@@ -79,7 +79,7 @@
         </div>
         <div class="grid_item h-align-right v-align-bottom" style="grid-auto-flow: column">
           <button class="button primary_button" style="margin-left: 10px;" @click="saveConfig">{{ $t('save')
-          }}</button>
+            }}</button>
           <button class="button" style="margin-left: 10px;" @click="closConfigPanel();">{{ $t('cancel') }}</button>
         </div>
       </div>
@@ -87,8 +87,8 @@
   </CustomDialog>
 </template>
 <script setup lang="ts">
-import { ref, onMounted, Ref, toRaw } from 'vue';
-import { Config, defaultconfig } from '../../type';
+import { ref, onMounted, watch } from 'vue';
+import { Config } from '../../type';
 import CustomDialog from './CustomDialog.vue';
 import CustomCheckbox from "./CustomCheckbox.vue"
 import { useI18n } from 'vue-i18n';
@@ -96,12 +96,21 @@ const { t } = useI18n();
 const emit = defineEmits(['close'])
 import { useConfigStore } from '../store/store';
 import { setTheme } from '../theme/theme';
-const config = useConfigStore().config;
-const tempConfig: Ref<Config> = ref(defaultconfig);
+
+const configStore = useConfigStore();
+const tempConfig = ref(configStore.config);
+
+watch(() => configStore.config, (newConfig: Config) => {
+  if (newConfig) {
+    tempConfig.value = JSON.parse(JSON.stringify(newConfig)) ;
+  }
+}, { immediate: true, deep: true }
+)
+
 const props = defineProps({
   modelValue: {
     type: Boolean,
-    required:true,
+    required: true,
     default: false
   }
 });
@@ -116,28 +125,32 @@ function setLanguage() {
 
 
 
-async function loadConfig() {
-  tempConfig.value = structuredClone(toRaw(config))
-}
-async function saveConfig() {
 
-  useConfigStore().setConfig(structuredClone(toRaw(tempConfig.value)));
-  useConfigStore().saveConfig();
+async function saveConfig() {
+  // 保存时创建新对象
+  await configStore.setConfig(JSON.parse(JSON.stringify(tempConfig.value)));
+  await configStore.saveConfig();
   setTheme(tempConfig.value.theme);
   closConfigPanel();
 }
+
 function closConfigPanel() {
+  // 关闭时重置为最新的 store 配置
+  tempConfig.value = {
+    ...configStore.config
+  };
   emit('close');
 }
 
 function resetConfig() {
-  useConfigStore().resetConfig();
-  loadConfig();
+  configStore.resetConfig();
+  tempConfig.value = {
+    ...configStore.config
+  };
 }
 
 
 onMounted(() => {
-  loadConfig();
 });
 </script>
 <style lang="css" scoped>

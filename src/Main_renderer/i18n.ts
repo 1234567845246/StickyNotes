@@ -23,6 +23,7 @@ export const messages = {
     cancel: "Cancel",
     add: 'Add',
     newtagname: "New tag name",
+    selecttag:'Select Tag',
     addtag: "Add Tag",
     placeholder: "Input content",
     config: {
@@ -76,6 +77,7 @@ export const messages = {
     add: '添加',
     newtagname: "新标签名称",
     addtag: "添加标签",
+    selecttag:"选择标签",
     placeholder: "输入内容",
     config: {
       title: '配置',

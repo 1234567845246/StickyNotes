@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
-import { ref, toRaw, computed} from 'vue'
-import { defaultconfig, Config, TagState, Tag, Note, NoteState } from '../../type'
+import { ref, toRaw, computed, ComputedRef} from 'vue'
+import { defaultconfig, Config, TagState, Tag, Note, NoteState, TrashConfig } from '../../type'
 
 
 export const useConfigStore = defineStore('config', () => {
@@ -8,24 +8,25 @@ export const useConfigStore = defineStore('config', () => {
     const loaded = ref(false);
 
     async function loadConfig() {
-        let cfg = window.electronAPI.configurate?.();
-        if (!cfg) {
-            cfg = await window.electronAPI.readConfig();
-        }
+        let cfg = window.electronAPI.configurate();
+    
         config.value = cfg;
         loaded.value = true;
     }
 
     async function setConfig(newConfig: Config) {
         config.value = newConfig
+        
         await window.electronAPI.writeConfig(toRaw(config.value));
     }
+    
+
     async function saveConfig() {
         await window.electronAPI.writeConfig(toRaw(config.value));
     }
     async function resetConfig() {
         config.value = { ...defaultconfig };
-        await window.electronAPI.writeConfig(config.value);
+        await window.electronAPI.writeConfig(toRaw(config.value));
     }
 
     return {
@@ -134,7 +135,7 @@ export const useNoteStore = defineStore('note', () => {
     //获取标签存储
     const tagStore = useTagStore();
     //获取回收站配置
-    const trashConfig =computed(()=>toRaw(useConfigStore().config.trashconfig));
+    const trashConfig:ComputedRef<TrashConfig> =computed(()=>{return {autoClean:useConfigStore().config.autoClean ,retentionDays:useConfigStore().config.retentionDays } });
     //获取所有标签
     const notes = computed(() => state.value.notes);
     // 获取搜索查询

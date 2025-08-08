@@ -17,10 +17,10 @@ let notes: NotesManager  = new NotesManager();
 app.whenReady().then(() => {
     let config = configManager.getConfig();
     mainWindow = new BrowserWindow({
-        minHeight:700,
-        minWidth:1000,
-        width: 1000,
-        height: 700,
+        minHeight:800,
+        minWidth:1250,
+        width: 1450,
+        height: 800,
         title:i18n .t('title'),
         icon:nativeImage.createFromPath(join(__dirname,'../public/notes.png')),
         webPreferences: {

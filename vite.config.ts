@@ -43,4 +43,7 @@ function devPlugin() {
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [devPlugin(), vue()],
+  json:{
+    stringify:true,
+  }
 })

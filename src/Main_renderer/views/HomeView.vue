@@ -9,23 +9,29 @@
     <div class="main-content" :class="{ 'main-narrow': showSidebar }">
       <AppHeader @toggle-sidebar="showSidebar = !showSidebar" @create-note="createNewNote" />
       <div class="content-area">
-          <TrashView 
+        <TrashView 
           v-if="showTrashView"
           @restore-note="restoreNoteFromTrash"
           @delete-permanently="deleteNotePermanently"
           @empty-trash="emptyTrash"
           @close="showTrashView = false"
         />
-        <NoteList v-else @edit-note="editNote" @delete-note="deleteNote" @toggle-pin="togglePinNote" />
+        <NoteEditor
+          v-else-if="showEditor && selectedNote"
+          :note="selectedNote"
+          @save="saveNote"
+          @close="closeEditor"
+        />
+        <NoteList
+          v-else
+          @edit-note="editNote"
+          @delete-note="deleteNote"
+          @toggle-pin="togglePinNote"
+        />
       </div>
     </div>
 
-    <!-- 便签编辑器模态框 -->
-    <div v-if="showEditor" class="modal-overlay" @click.self="closeEditor">
-      <div class="editor-modal">
-        <NoteEditor v-if="selectedNote" :note="selectedNote" @save="saveNote" @close="closeEditor" />
-      </div>
-    </div>
+    <!-- NoteEditor 弹窗已移除，直接在 main-content 区域显示 -->
 
     <!-- 标签管理器模态框 -->
     <div v-if="showTagManager" class="modal-overlay" @click.self="showTagManager = false">
