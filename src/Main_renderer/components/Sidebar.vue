@@ -14,9 +14,6 @@
           <li @click="emit('create-note')">
             <span class="icon">📝</span> {{ $t('newNoteTitle') }}
           </li>
-          <li>
-            <span class="icon">📌</span> {{ $t('painned') }}
-          </li>
           <li @click="emit('show-trash')">
             <span class="icon">
               🗑️

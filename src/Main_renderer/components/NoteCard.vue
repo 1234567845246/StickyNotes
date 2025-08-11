@@ -1,38 +1,39 @@
 <template>
-    <div class="note-card" :style="{backgroundColor:note.color}">
-      <div v-if="isEditting" class="edior-container">
+  <div class="note-card" :style="{ backgroundColor: note.color }">
+    <div v-if="isEditting" class="edior-container">
 
+    </div>
+    <div v-else>
+      <div class="card-header">
+        <h3 class="note-title">
+          {{ note.title }}
+        </h3>
+        <button class="pin-btn" :class="{ pinned: note.pinned }" @click.stop="togglePin"
+          :title="note.pinned ?  t('pinned') :  t('unpin')">
+          {{ note.pinned ? '📌' : '📍' }}
+        </button>
       </div>
-      <div v-else>
-        <div class="card-header">
-          <h3 class="note-title">
-            {{ note.title }}
-          </h3>
-          <button class="button pin-btn" v-if="note.pinned">
-            📌
+      <div class="note-content">
+        {{ note.content }}
+      </div>
+      <div class="tags-container">
+        <div v-for="tag in noteTags" :key="tag.id" class="tag-badge" :style="{ backgroundColor: tag.color }">
+          {{ tag.name }}
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="date">{{ formattedDate }}</span>
+        <div class="actions">
+          <button class="edit-btn" @click="handleEditorClick">
+            {{ $t('edit') }}
           </button>
-        </div>
-        <div class="note-content">
-          {{ note.content }}
-        </div>
-        <div class="tags-container">
-          <div v-for="tag in noteTags" :key="tag.id" class="tag-badge" :style="{backgroundColor:tag.color}">
-              {{ tag.name }}
-          </div>
-        </div>
-        <div class="card-footer">
-            <span class="date">{{ formattedDate }}</span>
-            <div class="actions">
-                <button class="edit-btn ">
-                  {{ $t('edit') }}
-                </button>
-                <button class="delete-btn">
-                  {{ $t('delete') }}
-                </button>
-            </div>
+          <button class="delete-btn" @click="handleDeleteClick">
+            {{ $t('delete') }}
+          </button>
         </div>
       </div>
     </div>
+  </div>
 
 </template>
 
@@ -40,30 +41,44 @@
 
 import { computed, ref } from 'vue';
 import { Note } from '../../type';
-import { useTagStore } from '../store/store';
+import { useNoteStore, useTagStore } from '../store/store';
+import { useI18n } from 'vue-i18n';
 
+
+const {t}= useI18n();
 
 const props = defineProps<{ note: Note }>();
 const tagStore = useTagStore();
+const noteStore = useNoteStore();
 const isEditting = ref<boolean>(false);
 
-const emit = defineEmits(['update', 'delete']);
+const emit = defineEmits(['editor']);
 
+function togglePin(){
+  noteStore.togglePinNote(props.note.id);
+}
 
+function handleEditorClick(){
+}
 
-const formattedDate = computed(()=>{
-  return new Date(props.note.updatedAt).toLocaleDateString('zh-CN',{
-    month:'short',
-    day:'numeric',
-    year:new Date(props.note.updatedAt).getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined  
+function handleDeleteClick(){
+
+  noteStore.removeNote(props.note.id);
+}
+
+const formattedDate = computed(() => {
+  return new Date(props.note.updatedAt).toLocaleDateString('zh-CN', {
+    month: 'short',
+    day: 'numeric',
+    year: new Date(props.note.updatedAt).getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
   });
 });
 
-const noteTags = computed(()=>{
-  return props.note.tags.map(tagId=>({
-    id:tagId,
-    name:tagStore.getTagName(tagId),
-    color:tagStore.getTagColor(tagId)
+const noteTags = computed(() => {
+  return props.note.tags.map(tagId => ({
+    id: tagId,
+    name: tagStore.getTagName(tagId),
+    color: tagStore.getTagColor(tagId)
   }))
 })
 
@@ -88,6 +103,10 @@ const noteTags = computed(()=>{
   transform: translateY(-5px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
+.note-card.pinned {
+  border-left: 4px solid #ffb74d;
+  background-color: rgba(255, 183, 77, 0.05);
+}
 
 .card-header {
   display: flex;
@@ -111,6 +130,13 @@ const noteTags = computed(()=>{
   border: none;
   font-size: 1.2rem;
   cursor: default;
+}
+.pin-btn.pinned {
+  color: #ffb74d;
+}
+
+.pin-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .note-content {
@@ -166,6 +192,4 @@ const noteTags = computed(()=>{
   /* background-color: rgba(244, 67, 54, 0.2); */
   color: var(--baseColor-gray3);
 }
-
-
 </style>

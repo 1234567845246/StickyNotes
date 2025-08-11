@@ -57,6 +57,32 @@
   --input-disabled-background: #98a2b3;
   --input-disabled-foreground: #9ca3af;
   --input-placeholder-foreground:#9ca3cf;
+
+ --trash-background: #ffffff;
+  --trash-header-border: #eeeeee;
+  --trash-empty-icon: #9e9e9e;
+  --trash-summary-bg: #fff8e1;
+  --trash-summary-color: #5d4037;
+  --trash-item-border: #f5f5f5;
+  --trash-item-hover: #fafafa;
+  --trash-meta-color: #757575;
+  --trash-remaining-days: #e65100;
+  
+  --trash-empty-btn-bg: #ffebee;
+  --trash-empty-btn-color: #c62828;
+  --trash-empty-btn-hover: #ffcdd2;
+  
+  --trash-close-btn-bg: #e3f2fd;
+  --trash-close-btn-color: #1565c0;
+  --trash-close-btn-hover: #bbdefb;
+  
+  --trash-restore-btn-bg: #e8f5e9;
+  --trash-restore-btn-color: #2e7d32;
+  --trash-restore-btn-hover: #c8e6c9;
+  
+  --trash-delete-btn-bg: #ffebee;
+  --trash-delete-btn-color: #c62828;
+  --trash-delete-btn-hover: #ffcdd2;
 }
 
 
@@ -124,6 +150,32 @@
   --input-disabled-background: #0f172a;
   --input-disabled-foreground: #475569;
   --input-placeholder-foreground:#64748b; 
+
+    --trash-background: #1a1a1a;
+  --trash-header-border: #333333;
+  --trash-empty-icon: #666666;
+  --trash-summary-bg: #332e1a;
+  --trash-summary-color: #d7ccc8;
+  --trash-item-border: #2a2a2a;
+  --trash-item-hover: #222222;
+  --trash-meta-color: #999999;
+  --trash-remaining-days: #ff9800;
+  
+  --trash-empty-btn-bg: #3a1d1d;
+  --trash-empty-btn-color: #ff5252;
+  --trash-empty-btn-hover: #4a2a2a;
+  
+  --trash-close-btn-bg: #1a2a3a;
+  --trash-close-btn-color: #64b5f6;
+  --trash-close-btn-hover: #2a3a4a;
+  
+  --trash-restore-btn-bg: #1a2a1d;
+  --trash-restore-btn-color: #81c784;
+  --trash-restore-btn-hover: #2a3a2d;
+  
+  --trash-delete-btn-bg: #3a1d1d;
+  --trash-delete-btn-color: #ff5252;
+  --trash-delete-btn-hover: #4a2a2a;
 }
 
 body {

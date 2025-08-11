@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, toRaw, computed, ComputedRef} from 'vue'
+import { ref, toRaw, computed, ComputedRef } from 'vue'
 import { defaultconfig, Config, TagState, Tag, Note, NoteState, TrashConfig } from '../../type'
 
 
@@ -9,17 +9,17 @@ export const useConfigStore = defineStore('config', () => {
 
     async function loadConfig() {
         let cfg = window.electronAPI.configurate();
-    
+
         config.value = cfg;
         loaded.value = true;
     }
 
     async function setConfig(newConfig: Config) {
         config.value = newConfig
-        
+
         await window.electronAPI.writeConfig(toRaw(config.value));
     }
-    
+
 
     async function saveConfig() {
         await window.electronAPI.writeConfig(toRaw(config.value));
@@ -126,24 +126,45 @@ export const useNoteStore = defineStore('note', () => {
     });
 
     const activeNotes = computed(() => {
-        return  state.value.notes.filter(note => !note.deleted);
+        return state.value.notes.filter(note => !note.deleted);
     })
     const trashNotes = computed(() => {
-       return  state.value.notes.filter(note => note.deleted);
+        return state.value.notes.filter(note => note.deleted);
     })
 
     //获取标签存储
     const tagStore = useTagStore();
     //获取回收站配置
-    const trashConfig:ComputedRef<TrashConfig> =computed(()=>{return {autoClean:useConfigStore().config.autoClean ,retentionDays:useConfigStore().config.retentionDays } });
+    const trashConfig: ComputedRef<TrashConfig> = computed(() => { return { autoClean: useConfigStore().config.autoClean, retentionDays: useConfigStore().config.retentionDays } });
     //获取所有标签
-    const notes = computed(() => state.value.notes);
+    const notes = computed(() => {
+        return [...state.value.notes].sort((a, b) => {
+            if (a.pinned && !b.pinned) {
+                return -1;
+            }
+            if (!a.pinned && b.pinned) {
+                return 1;
+            }
+            // 然后按更新时间排序
+            return new Date(b.updatedAt).getDate() - new Date(a.updatedAt).getDate();
+        })
+    });
+    const pinnedNotes = computed(() => {
+        return state.value.notes.filter(note => note.pinned);
+    })
     // 获取搜索查询
     const searchQuery = computed(() => state.value.searchQuery);
 
     // 设置搜索查询
     function setSearchQuery(query: string) {
         state.value.searchQuery = query;
+    }
+    //切换初始状态
+    function togglePinNote(noteId: string) {
+        const note = state.value.notes.find(n => n.id === noteId);
+        if (note) {
+            note.pinned = !note.pinned;
+        }
     }
     //设置标签
     function setNotes(notes: Note[]) {
@@ -176,7 +197,7 @@ export const useNoteStore = defineStore('note', () => {
 
     // 删除便签
     function removeNote(noteId: string) {
-      moveToTrash(noteId);
+        moveToTrash(noteId);
     }
     // 添加标签到便签
     function addTagToNote(noteId: string, tagId: string) {
@@ -266,15 +287,15 @@ export const useNoteStore = defineStore('note', () => {
     }
 
     //自动清理过期标签
-    function autoCleanTrash(){
-        if(!trashConfig.value.autoClean){
+    function autoCleanTrash() {
+        if (!trashConfig.value.autoClean) {
             return;
         }
         const now = new Date();
         const threshoId = trashConfig.value.retentionDays * 24 * 60 * 60 * 1000;
 
-        state.value.notes = state.value.notes.filter(note=>{
-            if(note.deleted && note.deletedAt !== undefined){
+        state.value.notes = state.value.notes.filter(note => {
+            if (note.deleted && note.deletedAt !== undefined) {
                 return now.getTime() - new Date(note.deletedAt).getTime() < threshoId;
             }
             return true;
@@ -306,9 +327,11 @@ export const useNoteStore = defineStore('note', () => {
     }
     return {
         notes,
+        pinnedNotes,
         searchQuery,
         activeNotes,
         trashNotes,
+        trashConfig,
         setNotes,
         setSearchQuery,
         addNote,
@@ -318,6 +341,7 @@ export const useNoteStore = defineStore('note', () => {
         removeTagFromNote,
         filteredNotes,
         initNotes,
+        togglePinNote,
 
         moveToTrash,
         restoreFromTrash,

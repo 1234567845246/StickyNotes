@@ -12,8 +12,20 @@
                  <span class="search-icon">🔍</span>
             </div>
         </div>
-        <div class="notes-grid">
-            <NoteCard v-for="note in filteredNotes" :key="note.id" :note="note" />
+                <!-- 添加置顶分组 -->
+        <div v-if="pinnedNotes.length > 0" class="notes-section">
+            <h3 class="section-title">{{ $t('pinned') }}</h3>
+            <div class="notes-grid">
+                <NoteCard v-for="note in pinnedNotes" :key="note.id" :note="note" />
+            </div>
+        </div>
+        
+        <!-- 添加其他便签分组 -->
+        <div v-if="unpinnedNotes.length > 0" class="notes-section">
+            <h3 v-if="pinnedNotes.length > 0" class="section-title">{{ $t('others') }}</h3>
+            <div class="notes-grid">
+                <NoteCard v-for="note in unpinnedNotes" :key="note.id" :note="note" />
+            </div>
         </div>
         <div v-if="filteredNotes.length === 0" class="empty-notes">
             <template v-if="noteStore.searchQuery">
@@ -39,6 +51,14 @@ const tagStore = useTagStore();
 const filteredNotes = computed(() => {
     return noteStore.filteredNotes();
 });
+
+const pinnedNotes = computed(()=>{
+    return filteredNotes.value.filter(note=>note.pinned);
+})
+
+const unpinnedNotes = computed(()=>{
+  return filteredNotes.value.filter(note=>!note.pinned);
+})
 
 const selectedTagName = computed(() => {
     if(tagStore.selectedTag) {
@@ -90,6 +110,14 @@ h2 {
   top: 50%;
   transform: translateY(-50%);
   color: #999;
+}
+
+.section-title {
+  color: var(--baseColor-gray5);
+  font-size: 1.2rem;
+  margin: 20px 0 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--baseColor-gray2);
 }
 
 .notes-grid {
