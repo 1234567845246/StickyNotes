@@ -1,8 +1,5 @@
 <template>
-    <div class="tag-manager">
-        <h2>
-            {{ $t('tagmanager') }}
-        </h2>
+    <CustomDialog v-model="model" :title="t('tagmanager')">
         <div class="add-tag-form">
             <input v-model="newTagName" :placeholder="t('newtagname')" class="input tag-input" />
             <input type="color" v-model="newTagColor" class="color-picker" />
@@ -29,16 +26,19 @@
         <div v-if="tagStore.tags.length === 0" class="empty-tags">
             {{ $t('searchQueryres2') }}
         </div>
-    </div>
+    </CustomDialog>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useNoteStore, useTagStore } from '../store/store';
 import TagBadge from './TagBadge.vue';
+import CustomDialog from './CustomDialog.vue';
 import { Tag } from '../../type';
 import { useI18n } from 'vue-i18n';
 
+
+const model = defineModel({type:Boolean,required:true})
 const {t} = useI18n();
 
 const tagStore = useTagStore();
@@ -101,19 +101,6 @@ const tagUsageCount = computed(() => {
 </script>
 
 <style lang="css" scoped>
-.tag-manager {
-    background-color: white;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-h2 {
-    margin-top: 0;
-    color: #333;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
-}
 
 .add-tag-form {
     display: flex;
@@ -138,12 +125,12 @@ h2 {
 
 
 .add-btn {
-    background-color: #4caf50;
-    color: white;
+    background-color: var( --trash-restore-btn-background);
+    color: var(--trash-restore-btn-foreground);
 }
 
 .add-btn:hover {
-    background-color: #388e3c;
+    background-color: var(--trash-restore-btn-hover);
 }
 
 .tag-list {
@@ -155,12 +142,12 @@ h2 {
 .tag-item {
     padding: 12px;
     border-radius: 6px;
-    background-color: #f9f9f9;
+    background-color: var(--menu-background);
     transition: all 0.3s;
 }
 
 .tag-item:hover {
-    background-color: #f0f0f0;
+    background-color: var(--menu-hover-background);
 }
 
 .tag-display {
@@ -175,21 +162,21 @@ h2 {
 }
 
 .edit-btn {
-    background-color: #2196f3;
-    color: white;
+    background-color: var(--button-primary);
+    color: var(--button-color);
 }
 
 .edit-btn:hover {
-    background-color: #1976d2;
+    background-color: var(--button-primary-hover);
 }
 
 .delete-btn {
-    background-color: #f44336;
-    color: white;
+    background-color: var(--trash-delete-btn-background);
+    color: var(--trash-delete-btn-foreground);
 }
 
 .delete-btn:hover {
-    background-color: #d32f2f;
+    background-color: var(--trash-delete-btn-hover);
 }
 
 .tag-edit-form {
@@ -199,18 +186,26 @@ h2 {
 }
 
 .save-btn {
-    background-color: #4caf50;
-    color: white;
+    background-color: var(--save-btn-background);
+    color: var(--save-btn-foreground);
+}
+
+.save-btn:hover{
+    background-color: var(--save-btn-hove);
 }
 
 .cancel-btn {
-    background-color: #9e9e9e;
-    color: white;
+    background-color: var(--baseColor-gray1);
+    color: var(--button-color);
+}
+.cancel-btn:hover {
+  background-color: var(--button-hover-background);
 }
 
 .empty-tags {
     text-align: center;
-    color: var(--baseColor-gray4);
+    background-color: var(--button-hover-background);
+    /* color: var(--baseColor-gray4); */
     padding: 20px;
 }
 </style>

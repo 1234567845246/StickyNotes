@@ -21,7 +21,7 @@
 
     <div class="content-editor">
       <MdEditor v-model="editedNote.content" :language="language" :theme="theme" :preview-theme="previewTheme"
-        :toolbars="toolbars">
+        :toolbars="toolbars" style="height: calc(-50px + 100%);">
         <template #defToolbars>
           <Emoji>
             <template #trigger> Emoji </template>
@@ -171,6 +171,7 @@ const showTagSelector = ref(false);
   box-shadow: var(--shadow);
   padding: 20px;
   position: relative;
+  height: calc(-40px + 100%);
 }
 
 .editor-header {
@@ -236,6 +237,7 @@ const showTagSelector = ref(false);
 
 .content-editor {
   margin-top: 10px;
+  height: calc(-100px + 100%);
 }
 
 .note-content {

@@ -80,9 +80,9 @@ function handleKeydown(e: KeyboardEvent) {
     /* display: flex; */
     display: none;
     flex-direction: column;
-    max-width: calc(100% - 20px);
+    max-width: calc(100vw - 20px);
     min-height: 130px;
-    max-height: calc(100% - 20px);
+    max-height: calc(100vh - 20px);
     padding: 6px;
     animation: modal-dialog-dialog-fade-in 300ms ease-out;
     border-radius: 6px;
@@ -95,11 +95,6 @@ function handleKeydown(e: KeyboardEvent) {
     opacity: 0;
 }
 
-/* .custom-dialog::backdrop {
-
-    animation: modal-dialog-overlay-fade-in 250ms ease-out;
-    background: var(--dialog-overlay-background);
-} */
 
 dialog[open] {
     opacity: 1;
@@ -181,7 +176,7 @@ dialog[open]::backdrop {
     max-width: 100%;
     padding: 16px;
     padding-right: 8px;
-    overflow: hidden;
+    overflow: auto;
     border-radius: 3px;
     background: var(--dialog-background);
     color: var(--diglog-foreground);

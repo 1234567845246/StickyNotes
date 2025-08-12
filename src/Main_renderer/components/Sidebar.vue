@@ -102,6 +102,9 @@ function showabout() {
   flex-direction: column;
   box-shadow: 2px 0 10px var(--shadow);
   overflow: hidden;
+
+  transition: left 0.3s ease, scrollbar-color 0.3s ease;
+
 }
 
 .sidebar-open {
@@ -144,6 +147,36 @@ function showabout() {
   flex: 1;
   overflow-y: auto;
   padding: 15px 0;
+  /* 滚动条样式 - 默认隐藏 */
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.sidebar:hover .sidebar-content{
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+.sidebar-content::-webkit-scrollbar{
+  width: 6px;
+  background-color: transparent;
+}
+
+.sidebar:hover .sidebar-content::-webkit-scrollbar{
+  background-color: var(--scrollbar-track);
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 3px;
+}
+
+.sidebar:hover .sidebar-content::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border: 1px solid var(--scrollbar-track);
+}
+
+.sidebar-content::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover);
 }
 
 .sidebar-section {

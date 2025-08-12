@@ -16,17 +16,10 @@
       </div>
     </div>
 
-    <!-- NoteEditor 弹窗已移除，直接在 main-content 区域显示 -->
-
-    <!-- 标签管理器模态框 -->
-    <div v-if="showTagManager" class="modal-overlay" @click.self="showTagManager = false">
-      <div class="tag-manager-modal">
-        <TagManager />
-        <button class="close-modal" @click="showTagManager = false">
-          &times;
-        </button>
-      </div>
-    </div>
+   
+    <TagManager  v-model="showTagManager"/>
+    
+  
 
 
 

@@ -1,80 +1,121 @@
 <template>
-    <div class="note-list">
-        <div class="list-header">
-            <h2 v-if="selectedTagName !== null">
-                {{ selectedTagName }}
-            </h2>
-            <h2 v-else>
-                {{ $t('allnote') }}
-            </h2>
-            <div class="search-box">
-                <input v-model="noteStore.searchQuery" :placeholder="t('search')" class="input search-input" />
-                 <span class="search-icon">🔍</span>
-            </div>
-        </div>
-                <!-- 添加置顶分组 -->
-        <div v-if="pinnedNotes.length > 0" class="notes-section">
-            <h3 class="section-title">{{ $t('pinned') }}</h3>
-            <div class="notes-grid">
-                <NoteCard v-for="note in pinnedNotes" :key="note.id" :note="note" />
-            </div>
-        </div>
-        
-        <!-- 添加其他便签分组 -->
-        <div v-if="unpinnedNotes.length > 0" class="notes-section">
-            <h3 v-if="pinnedNotes.length > 0" class="section-title">{{ $t('others') }}</h3>
-            <div class="notes-grid">
-                <NoteCard v-for="note in unpinnedNotes" :key="note.id" :note="note" />
-            </div>
-        </div>
-        <div v-if="filteredNotes.length === 0" class="empty-notes">
-            <template v-if="noteStore.searchQuery">
-                {{ $t('searchQueryres1') }}
-            </template>
-            <template v-else>
-                {{ $t('searchQueryres2') }}
-            </template>
-        </div>
+  <div class="note-list">
+    <div class="list-header">
+      <h2 v-if="selectedTagName !== null">
+        {{ selectedTagName }}
+      </h2>
+      <h2 v-else>
+        {{ $t('allnote') }}
+      </h2>
+      <div class="search-box">
+        <input v-model="search" :placeholder="t('search')" class="input search-input" @input="handleSearchInput" />
+        <span class="search-icon">🔍</span>
+      </div>
     </div>
+    <!-- 添加置顶分组 -->
+    <div v-if="pinnedNotes.length > 0" class="notes-section">
+      <h3 class="section-title">{{ $t('pinned') }}</h3>
+      <div class="notes-grid">
+        <NoteCard v-for="note in pinnedNotes" :key="note.id" :note="note" />
+      </div>
+    </div>
+
+    <!-- 添加其他便签分组 -->
+    <div v-if="unpinnedNotes.length > 0" class="notes-section">
+      <h3 v-if="pinnedNotes.length > 0" class="section-title">{{ $t('others') }}</h3>
+      <div class="notes-grid">
+        <NoteCard v-for="note in unpinnedNotes" :key="note.id" :note="note" />
+      </div>
+    </div>
+    <div v-if="filteredNotes.length === 0" class="empty-notes">
+      <template v-if="noteStore.searchQuery">
+        {{ $t('searchQueryres1') }}
+      </template>
+      <template v-else>
+        {{ $t('searchQueryres2') }}
+      </template>
+    </div>
+  </div>
 </template>
-<script setup lang="ts"> 
-import {  computed } from 'vue';
+<script setup lang="ts">
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useNoteStore ,useTagStore} from '../store/store';
+import { useNoteStore, useTagStore } from '../store/store';
 import NoteCard from './NoteCard.vue';
 
-const {t} = useI18n();
+const { t } = useI18n();
 
 const noteStore = useNoteStore();
 const tagStore = useTagStore();
 
+const search = ref<string>('');
+function handleSearchInput() {
+  noteStore.setSearchQuery(search.value)
+}
+
 const filteredNotes = computed(() => {
-    return noteStore.filteredNotes();
+  return noteStore.filteredNotes();
 });
 
-const pinnedNotes = computed(()=>{
-    return filteredNotes.value.filter(note=>note.pinned);
+const pinnedNotes = computed(() => {
+  return filteredNotes.value.filter(note => note.pinned);
 })
 
-const unpinnedNotes = computed(()=>{
-  return filteredNotes.value.filter(note=>!note.pinned);
+const unpinnedNotes = computed(() => {
+  return filteredNotes.value.filter(note => !note.pinned);
 })
 
 const selectedTagName = computed(() => {
-    if(tagStore.selectedTag) {
-        return tagStore.getTagName(tagStore.selectedTag);
-    }
-    return null;
+  if (tagStore.selectedTag) {
+    return tagStore.getTagName(tagStore.selectedTag);
+  }
+  return null;
 });
 
 </script>
-<style  lang="css" scoped>
+<style lang="css" scoped>
 .note-list {
   flex: 1;
   padding: 20px;
   display: flex;
   flex-direction: column;
+
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.3s ease;
 }
+
+/* 鼠标悬停时显示滚动条 */
+.note-list:hover {
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+/* Chrome/Safari 滚动条样式 */
+.note-list::-webkit-scrollbar {
+  width: 6px;
+  background-color: transparent;
+}
+
+.note-list:hover::-webkit-scrollbar {
+  background-color: var(--scrollbar-track);
+}
+
+.note-list::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 3px;
+}
+
+.note-list:hover::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border: 1px solid var(--scrollbar-track);
+}
+
+.note-list::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover);
+}
+
+
 
 .list-header {
   display: flex;
@@ -136,5 +177,4 @@ h2 {
   font-size: 1.2rem;
   padding: 40px;
 }
-
 </style>

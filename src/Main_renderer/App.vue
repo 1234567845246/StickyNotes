@@ -10,7 +10,6 @@ import ConfigPanel from "./components/ConfigPanel.vue";
 import HomeView from './views/HomeView.vue';
 
 import { useConfigStore } from "./store/store";
-// import { RouterView } from 'vue-router';
 const showConfig = ref(false);
 
 

@@ -136,8 +136,8 @@ button {
 }
 
 .empty-btn {
-  background-color: var(--trash-empty-btn-bg);
-  color: var(--trash-empty-btn-color);
+  background-color: var(--trash-empty-btn-background);
+  color: var(--trash-empty-btn-foreground);
 }
 
 .empty-btn:disabled {
@@ -150,8 +150,8 @@ button {
 }
 
 .close-btn {
-  background-color: var(--trash-close-btn-bg);
-  color: var(--trash-close-btn-color);
+  background-color: var(--trash-close-btn-background);
+  color: var(--trash-close-btn-foreground);
 }
 
 .close-btn:hover {
@@ -178,11 +178,11 @@ button {
 }
 
 .trash-summary {
-  background-color: var(--trash-summary-bg);
+  background-color: var(--trash-summary-background);
   padding: 10px 15px;
   border-radius: 6px;
   margin-bottom: 15px;
-  color: var(--trash-summary-color);
+  color: var(--trash-summary-foreground);
   font-size: 14px;
 }
 
@@ -232,8 +232,8 @@ button {
 }
 
 .restore-btn {
-  background-color: var(--trash-restore-btn-bg);
-  color: var(--trash-restore-btn-color);
+  background-color: var(--trash-restore-btn-background);
+  color: var(--trash-restore-btn-foreground);
 }
 
 .restore-btn:hover {
@@ -241,8 +241,8 @@ button {
 }
 
 .delete-btn {
-  background-color: var(--trash-delete-btn-bg);
-  color: var(--trash-delete-btn-color);
+  background-color: var(--trash-delete-btn-background);
+  color: var(--trash-delete-btn-foreground);
 }
 
 .delete-btn:hover {

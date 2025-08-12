@@ -9,7 +9,7 @@
                 {{ tag.name }}
             </div>
         </div>
-        <button @click="createNewTag" class="button">{{ t('addtag') }}</button>
+       
     </CustomDialog>
 
 </template>
@@ -40,17 +40,6 @@ const avaliableTags = computed(() => {
 function addTag(tagId: string) {
     emit('add', tagId);
     emit('close');
-}
-
-//创建新标签
-function createNewTag() {
-    const newTagName = prompt('输入新标签名称');
-    if (newTagName) {
-        tagStore.addTag({
-            name: newTagName,
-            color: '#4fc3f7'
-        })
-    }
 }
 
 </script>
