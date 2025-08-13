@@ -116,15 +116,8 @@ const props = defineProps({
 });
 
 function setLanguage() {
-  alert(t('alert1'));
+  window.electronAPI.restart({language:tempConfig.value.language});
 }
-
-
-
-
-
-
-
 
 async function saveConfig() {
   // 保存时创建新对象

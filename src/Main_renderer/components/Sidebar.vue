@@ -41,18 +41,6 @@
           </li>
         </ul>
       </div>
-
-      <div class="sidebar-section">
-        <h3>{{ $t('datamanipulation') }}</h3>
-        <ul class="sidebar-menu">
-          <li @click="emit('export-data')">
-            <span class="icon">💾</span> {{ $t('export') }}
-          </li>
-          <li @click="triggerImport">
-            <span class="icon">📥</span> {{ $t('import') }}
-          </li>
-        </ul>
-      </div>
       <div class="sidebar-footer">
         <button @click="showabout" class="about-btn">
           {{ $t('about') }}
@@ -73,13 +61,11 @@ defineProps<{
   show: boolean
 }>()
 
-const emit = defineEmits(['close', 'create-note', 'toggle-tag-manager', 'export-data', 'import-data','show-trash']);
+const emit = defineEmits(['close', 'create-note', 'toggle-tag-manager','show-trash']);
 
 const noteStore = useNoteStore();
 const tagStore = useTagStore();
-function triggerImport() {
-  emit('import-data')
-}
+
 const trashCount = computed(() => noteStore.trashNotes.length);
 
 function showabout() {

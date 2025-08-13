@@ -1,10 +1,10 @@
 //src\main\mainEntry.ts
-import { app, BrowserWindow, ipcMain, nativeImage, nativeTheme } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, nativeImage, nativeTheme } from "electron";
 import { join } from "path";
 import { MenuManager } from "./MenuManager";
 import { NotesManager } from "./notes";
 import { configManager } from "./Config";
-import { Language, Theme, Note } from "../type";
+import { Language, Theme, Note,Config } from "../type";
 import { i18n } from "./I18n";
 
 app.setPath('userData', join(app.getPath('appData'), 'StickyNotes'));
@@ -72,6 +72,23 @@ app.whenReady().then(() => {
         menuManguage.showAbout();
     })
 
+
+    ipcMain.on('restart',async (_,config: Partial<Config>)=>{
+       let {response}  =await dialog.showMessageBox(mainWindow,{
+            type:'warning',
+            message:i18n.t('restartmessage'),
+            buttons:[i18n.t('restart'),i18n.t('cancel')],
+            defaultId:0,
+            title:i18n.t('title'),
+            noLink:true
+        })
+        
+        if(response === 0){
+            configManager.setConfig(config);
+            app.relaunch();
+            app.quit();
+        }
+    })
 });
 
 app.on('window-all-closed', () => {

@@ -2,6 +2,8 @@
     "title":"桌面便签",
     "aboutmessage":"关于桌面便签",
     "aboutdetail":"版本: 1.0.0\n使用 Vue 3 + TypeScript 构建\n功能: 创建、编辑、删除便签，标签分类，搜索等\n",
+    "restartmessage":"一些改动需要重新启动才能生效，是否现在立即重启?",
+    "restart":"重启",
     "menu.file": "文件",
     "menu.file.open": "打开",
     "menu.file.openRecent": "打开最近文件",
@@ -16,5 +18,7 @@
     "menu.newnote":"新建便签",
     "menu.help": "帮助",
     "menu.help.config": "配置",
-    "menu.help.about": "关于"
+    "menu.help.about": "关于",
+    "ok":"确认",
+    "cancel":"取消"
 }

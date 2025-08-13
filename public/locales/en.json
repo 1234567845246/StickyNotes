@@ -2,6 +2,8 @@
     "title":"Sticky Notes",
     "aboutmessage":"About Sticky Notes",
     "aboutdetail":"Version: 1.0.0\nBuilt with Vue 3 + TypeScript\nFeatures: Create, edit, delete notes, tag categorization, search, etc.",
+    "restartmessage":"Some changes require a restart to take effect. Whether to restart now?",
+    "restart":"Restart",
     "menu.file": "File",
     "menu.file.open": "Open",
     "menu.file.openRecent": "Open Recent",
@@ -16,5 +18,7 @@
     "menu.newnote":"New Note",
     "menu.help": "Help",
     "menu.help.config": "Config",
-    "menu.help.about": "About"
+    "menu.help.about": "About",
+    "ok":"OK",
+    "cancel":"Cancel"
 }

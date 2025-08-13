@@ -20,7 +20,8 @@ export declare interface ElectronAPI {
     saveNote: (note: Note) => Promise<any>;
     deleteNote: (id: string) => Promise<any>;
     createNote: (callback: (...args: any[]) => void) => void;
-    showAbout: () => void
+    showAbout: () => void;
+    restart:(newConfig: Partial<Config>)=>void;
 
     configurate: () => Config;
     readConfig: () => Promise<any>;
@@ -32,15 +33,12 @@ export declare interface ElectronAPI {
 
 contextBridge.exposeInMainWorld('electronAPI', {
 
-
-
-
     getNotes: () => ipcRenderer.invoke('get-notes'),
     saveNote: (note: Note) => ipcRenderer.invoke('save-note', note),
     deleteNote: (id: string) => ipcRenderer.invoke('delete-note', id),
     createNote: (callback: (...args: any[]) => void) => ipcRenderer.on('create-note', callback),
     showAbout:()=>ipcRenderer.send('show-about'),
-
+    restart:(newConfig: Partial<Config>)=>ipcRenderer.send('restart',newConfig),
     configurate: () => parseArgv('window-config'),
     readConfig: () => ipcRenderer.invoke('read-config'),
     writeConfig: (config: Config) => ipcRenderer.invoke('write-config', config),

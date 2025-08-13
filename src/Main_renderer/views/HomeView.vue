@@ -3,7 +3,7 @@
   <div class="app-container">
     <div class="sidebar-wrapper" :class="{ 'sidebar-visible': showSidebar }">
       <Sidebar :show="showSidebar" @close="showSidebar = false" @create-note="createNewNote"
-        @toggle-tag-manager="showTagManager = !showTagManager" @export-data="exportData" @import-data="importData"
+        @toggle-tag-manager="showTagManager = !showTagManager"
         @show-trash="showTrashView = true" />
     </div>
     <div class="main-content" :class="{ 'main-narrow': showSidebar }">
@@ -127,64 +127,6 @@ function togglePinNote(noteId: string) {
   }
 }
 
-
-async function exportData() {
-
-  const handle = await window.showSaveFilePicker({
-    suggestedName: `note-${new Date().toISOString().slice(0, 10)}.json`,
-    types: [{
-      description: t('filterfile'),
-      accept: {
-        'application/json': ['.json']
-      }
-    }]
-  })
-
-  const writableStream = await handle.createWritable();
-  await writableStream.write(JSON.stringify(noteStore.notes));
-  await writableStream.close();
-
-}
-
-// 导入数据
-async function importData() {
-      console.log(await readFileContent())
-};
-
-/**
- * 打开文件选择器并读取内容
- * @param multiple 是否支持多选（默认 false）
- * @returns 文件内容（文本）或 null（用户取消）
- */
-async function readFileContent(multiple = false): Promise<string[] | null> {
-  try {
-
-
-    // 1. 打开文件选择器
-    const fileHandles = await window.showOpenFilePicker({
-      types: [{
-        description: t('filterfile'),
-        accept: {
-          'application/json': ['.json']
-        }
-      }],
-      excludeAcceptAllOption: true,
-      multiple: false
-    });
-
-    const contents = await Promise.all(
-      fileHandles.map(async (handle) => {
-        const file = await handle.getFile();
-        return file.text(); 
-      })
-    );
-
-    return multiple ? contents : [contents[0]];
-  } catch (err) {
-    console.error('读取文件失败:', err);
-    return null;
-  }
-}
 
 function getRandomColor() {
   const colors = ['#fff9c4', // 黄色

@@ -21,16 +21,18 @@
 
     <div class="content-editor">
       <MdEditor v-model="editedNote.content" :language="language" :theme="theme" :preview-theme="previewTheme"
-        :toolbars="toolbars" style="height: calc(-50px + 100%);">
+        :toolbars="toolbars" style="height: calc(-50px + 100%);" :onHtmlChanged="handleHtmlChange">
         <template #defToolbars>
           <Emoji>
             <template #trigger> Emoji </template>
           </Emoji>
           <ThemeSwitch v-model="theme" />
           <PreviewThemeSwitch v-model="previewTheme" />
-
+          <ExportToolBar :markdown="editedNote.content" :html="html" />
+          <ImportTooBar />
         </template>
       </MdEditor>
+
     </div>
 
     <TagSelector v-model="showTagSelector" :current-tags="editedNote.tags" @add="addTag"
@@ -53,15 +55,16 @@ import cropper from 'cropperjs';
 
 import TagSelector from './TagSelector.vue';
 import LimitInput from './LimitInput.vue';
-// import { useConfigStore } from '../store/store';
+import ExportToolBar from './ExportToolBar.vue';
+import ImportTooBar from './ImportTooBar.vue';
 
 import { Emoji, PreviewThemeSwitch, ThemeSwitch } from '@vavt/v3-extension';
 import { MdEditor, config, PreviewThemes, Themes, ToolbarNames } from 'md-editor-v3';
-// const useconfig = useConfigStore()
 
+const html = ref('');
 let language = window.electronAPI.configurate().language === 'en' ? 'en-US' : 'zh-CN';
 const previewTheme = ref<PreviewThemes>('default');
-const theme = ref<Themes>(document.body.getAttribute('data-theme') as 'light' | 'dark' );
+const theme = ref<Themes>(document.body.getAttribute('data-theme') as 'light' | 'dark');
 const toolbars: ToolbarNames[] = [
   'bold',
   'underline',
@@ -88,7 +91,8 @@ const toolbars: ToolbarNames[] = [
   'revoke',
   'next',
   '=',
-  'pageFullscreen',
+  3,
+  4,
   'fullscreen',
   'preview',
   'previewOnly',
@@ -149,6 +153,10 @@ function addTag(tagId: string) {
     editedNote.value.tags = [...editedNote.value.tags, tagId];
   }
   emit('update:note', editedNote.value);
+}
+
+function handleHtmlChange(h: string) {
+  html.value = h;
 }
 
 
