@@ -67,7 +67,16 @@ function exporthtml() {
                 'text/html': ['.html']
             }
         }]
-    }, props.html)
+    },removeImageProtocol(props.html))
+}
+
+function removeImageProtocol(html:string){
+     return html.replace(
+        /<img([^>]*)src="image:\/\/([^"]+)"([^>]*)>/gi,
+        (_, before, path, after) => {
+          return `<img${before}src="${path}"${after}>`;
+        }
+      );
 }
 
 

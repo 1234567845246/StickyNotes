@@ -1,18 +1,27 @@
 //src\main\mainEntry.ts
-import { app, BrowserWindow, dialog, ipcMain, nativeImage, nativeTheme } from "electron";
-import { join } from "path";
+import { app, BrowserWindow, dialog, ipcMain, nativeImage, nativeTheme, protocol } from "electron";
+import { join, isAbsolute, extname } from "path";
 import { MenuManager } from "./MenuManager";
 import { NotesManager } from "./notes";
 import { configManager } from "./Config";
-import { Language, Theme, Note,Config } from "../type";
+import { Language, Theme, Note, Config } from "../type";
 import { i18n } from "./I18n";
+import { existsSync, readFileSync } from "fs";
+import { platform } from "os";
+import { insertChar } from "../tools";
 
 app.setPath('userData', join(app.getPath('appData'), 'StickyNotes'));
 let mainWindow: BrowserWindow;
 let menuManguage: MenuManager;
 let notes: NotesManager = new NotesManager();
 
-
+protocol.registerSchemesAsPrivileged([{
+    scheme: 'image', privileges: {
+        standard: true,
+        secure: true,
+        supportFetchAPI: true
+    }
+}])
 
 app.whenReady().then(() => {
     let config = configManager.getConfig();
@@ -72,18 +81,64 @@ app.whenReady().then(() => {
         menuManguage.showAbout();
     })
 
+    protocol.handle('image', async (req) => {
+        console.log(req.url);
+        let filePath:string = req.url.slice('image://'.length);
 
-    ipcMain.on('restart',async (_,config: Partial<Config>)=>{
-       let {response}  =await dialog.showMessageBox(mainWindow,{
-            type:'warning',
-            message:i18n.t('restartmessage'),
-            buttons:[i18n.t('restart'),i18n.t('cancel')],
-            defaultId:0,
-            title:i18n.t('title'),
-            noLink:true
+        if(platform() === 'win32'){
+            if(filePath.at(1) !== ':'){
+               filePath = insertChar(filePath,1,":");
+            }
+        }
+
+        console.log(filePath);
+
+        if (!existsSync(filePath)) {
+            return new Response('File not found', {
+                status: 404,
+                headers: { 'content-type': 'text/plain' }
+            });
+        }
+
+        if (!isAbsolute(filePath)) {
+            return new Response('Only absolute paths are allowed', {
+                status: 403,
+                headers: { 'content-type': 'text/plain' }
+            })
+        }
+
+        const ext = extname(filePath).toLowerCase();
+        const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'];
+        if (!allowedExtensions.includes(ext)) {
+            return new Response('Only image files are allowed', {
+                status: 403,
+                headers: { 'content-type': 'text/plain' }
+            });
+        }
+
+
+        return new Response(readFileSync(filePath), {
+            status: 200,
+            headers: {
+                'content-type': getMimeType(filePath) || 'application/octet-stream',
+            }
+        });
+
+    })
+
+
+    ipcMain.on('restart', async (_, config: Partial<Config>) => {
+        let { response } = await dialog.showMessageBox(mainWindow, {
+            type: 'warning',
+            message: i18n.t('restartmessage'),
+            buttons: [i18n.t('restart'), i18n.t('cancel')],
+            defaultId: 0,
+            title: i18n.t('title'),
+            noLink: true
         })
-        
-        if(response === 0){
+
+
+        if (response === 0) {
             configManager.setConfig(config);
             app.relaunch();
             app.quit();
@@ -96,3 +151,18 @@ app.on('window-all-closed', () => {
         app.quit();
     }
 })
+
+function getMimeType(filePath: string) {
+    const ext = extname(filePath).toLowerCase();
+    const mimeMap: Map<string, string> = new Map([
+        ['.jpg', 'image/jpeg'],
+        ['.jpeg', 'image/jpeg'],
+        ['.png', 'image/png'],
+        ['.gif', 'image/gif'],
+        ['.webp', 'image/webp'],
+        ['.bmp', 'image/bmp'],
+        ['.svg', 'image/svg+xml']
+        // 添加其他需要支持的图片类型
+    ]);
+    return mimeMap.get(ext) || 'application/octet-stream';
+}

@@ -8,3 +8,6 @@ export function formatTime(timestamp: string) {
     return new Date(timestamp).toISOString();
 }
 
+export function insertChar(str:string,index:number,char:string){
+    return str.substring(0,index) + char + str.substring(index);
+}
