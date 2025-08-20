@@ -120,7 +120,7 @@ app.whenReady().then(() => {
         return new Response(readFileSync(filePath), {
             status: 200,
             headers: {
-                'content-type': getMimeType(filePath) || 'application/octet-stream',
+                'content-type': getMimeType(filePath),
             }
         });
 

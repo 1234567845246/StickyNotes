@@ -2,7 +2,7 @@
   <div class="note-editor">
     <div class="editor-header">
       <LimitInput v-model="editedNote.title" @input="updateContent('title', editedNote.title)" />
-      <button @click="emit('close')" class="button">❌</button>
+      <button @click="closeEditor" class="button">❌</button>
     </div>
 
     <div class="tags-section">
@@ -20,8 +20,8 @@
     </div>
 
     <div class="content-editor">
-      <MdEditor v-model="editedNote.content" :language="language" :theme="theme" :preview-theme="previewTheme"
-        :toolbars="toolbars" style="height: calc(-50px + 100%);" :onHtmlChanged="handleHtmlChange">
+      <MdEditor v-model="editedNote.content" ref="editorRef" :language="language" :theme="theme" :preview-theme="previewTheme"
+        :toolbars="toolbars" style="height: calc(-50px + 100%);" :onHtmlChanged="handleHtmlChange"  @onDrop="handleDrag">
         <template #defToolbars>
           <Emoji>
             <template #trigger> Emoji </template>
@@ -41,10 +41,11 @@
 
 </template>
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useTagStore } from '../store/store';
+import { ref, useTemplateRef } from 'vue';
+import { useNoteStore, useTagStore } from '../store/store';
 import { Note } from '../../type';
-// import { useI18n } from 'vue-i18n';
+import { useI18n } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
 import screenfull from 'screenfull';
 import hljs from 'highlight.js';
 import prettier from "prettier"
@@ -59,8 +60,12 @@ import ExportToolBar from './ExportToolBar.vue';
 import ImportTooBar from './ImportTooBar.vue';
 
 import { Emoji, PreviewThemeSwitch, ThemeSwitch } from '@vavt/v3-extension';
-import { MdEditor, config, PreviewThemes, Themes, ToolbarNames } from 'md-editor-v3';
+import { MdEditor, config, PreviewThemes, Themes, ToolbarNames ,ExposeParam} from 'md-editor-v3';
 
+const editorRef = useTemplateRef<ExposeParam>('editorRef');
+const route = useRoute();
+const router = useRouter();
+const { t } = useI18n();
 const html = ref('');
 let language = window.electronAPI.configurate().language === 'en' ? 'en-US' : 'zh-CN';
 const previewTheme = ref<PreviewThemes>('default');
@@ -142,17 +147,65 @@ observer.observe(document.body, {
 
 
 const tagStore = useTagStore();
-const props = defineProps<{ note: Note }>();
+const noteStore = useNoteStore();
 
-const emit = defineEmits(['update:note', 'close']);
-const editedNote = ref<Note>({ ...props.note });
+const editedNote = ref<Note>(getInitialNote());
+
+function getInitialNote(): Note {
+  if (route.name === 'create') {
+    return createDefaultNote();
+  } else {
+    // 从store获取现有笔记
+    const note = noteStore.getNoteById(route.params.id as string);
+    return note ? { ...note } : createDefaultNote();
+  }
+}
+
+// 保存笔记并返回首页
+function saveNote() {
+  if (editedNote.value.id) {
+    noteStore.updateNote(editedNote.value.id, editedNote.value);
+  } else {
+    noteStore.addNote(editedNote.value);
+  }
+  // router.push({ name: 'home' });
+}
+
+function closeEditor() {
+  router.push({ name: 'home' });
+}
+
+function getRandomColor() {
+  const colors = ['#fff9c4', // 黄色
+    '#c8e6c9', // 绿色
+    '#bbdefb', // 蓝色
+    '#f8bbd0', // 粉色
+    '#e1bee7', // 紫色
+    '#ffccbc'  // 橙色
+  ]
+  return colors[Math.floor(Math.random() * colors.length)];
+}
+
+function createDefaultNote():Note {
+  return {
+    id: Date.now().toString(),
+    title: t('newNoteTitle'),
+    content: '',
+    tags: [],
+    color: getRandomColor(),
+    pinned: false,
+    deleted: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }
+}
 
 //添加标签
 function addTag(tagId: string) {
   if (editedNote.value.tags.includes(tagId)) {
     editedNote.value.tags = [...editedNote.value.tags, tagId];
   }
-  emit('update:note', editedNote.value);
+  saveNote();
 }
 
 function handleHtmlChange(h: string) {
@@ -162,13 +215,37 @@ function handleHtmlChange(h: string) {
 
 function removeTag(tagId: string) {
   editedNote.value.tags = editedNote.value.tags.filter(id => id !== tagId);
-  emit('update:note', editedNote.value);
+  saveNote();
 }
 
 function updateContent(field: 'title' | 'content', value: any) {
   editedNote.value[field] = value;
-  emit('update:note', editedNote.value);
+  saveNote();
 }
+function handleDrag(e:DragEvent){
+  e.preventDefault();
+  if(e.dataTransfer !== null){
+    if(e.dataTransfer.files.length  > 0){
+      const files =  e.dataTransfer.files;
+      for(let i = 0; i< files.length ;i++){
+        const file = files[i];
+
+        if(file.type.startsWith('image/')){
+            let filepath = window.electronAPI.getPathForFile(file);
+            if(filepath !== ''){
+              editorRef.value?.insert(()=>{
+                return {
+                  targetValue:`![](image://${filepath})`,
+                  select:false
+                }
+              });
+            }
+        }
+      }
+    }
+  }
+}
+
 
 const showTagSelector = ref(false);
 

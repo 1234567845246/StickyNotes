@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from "electron";
+import { contextBridge, ipcRenderer ,webUtils} from "electron";
 import { Config, Note, Theme } from "../type";
 
 function parseArgv(key: string) {
@@ -28,7 +28,9 @@ export declare interface ElectronAPI {
     writeConfig: (config: Config) => Promise<any>;
     setThemeSource: (theme: Theme) => void;
     setLanguage: (language: string) => void;
-    onOpenConfigPage: (cb: (...args: any[]) => void) => void
+    onOpenConfigPage: (cb: (...args: any[]) => void) => void;
+
+    getPathForFile: (file: File) => string;
 }
 
 contextBridge.exposeInMainWorld('electronAPI', {
@@ -44,6 +46,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     writeConfig: (config: Config) => ipcRenderer.invoke('write-config', config),
     setThemeSource: (theme: Theme) => ipcRenderer.send('set-theme-source', theme),
     setLanguage: (language: string) => ipcRenderer.send('set-language', language),
-    onOpenConfigPage: (cb: (...args: any[]) => void) => ipcRenderer.on('open-config-page', cb)
+    onOpenConfigPage: (cb: (...args: any[]) => void) => ipcRenderer.on('open-config-page', cb),
+
+    getPathForFile:(file:File)=>  webUtils.getPathForFile(file).replace(/\\/g, "/"),
 } as ElectronAPI);
 

@@ -43,22 +43,24 @@ import { computed, ref } from 'vue';
 import { Note } from '../../type';
 import { useNoteStore, useTagStore } from '../store/store';
 import { useI18n } from 'vue-i18n';
-
+import { useRouter } from 'vue-router';
 
 const {t}= useI18n();
+const router = useRouter();
 
 const props = defineProps<{ note: Note }>();
 const tagStore = useTagStore();
 const noteStore = useNoteStore();
 const isEditting = ref<boolean>(false);
 
-const emit = defineEmits(['editor']);
+const emit = defineEmits(['edit']);
 
 function togglePin(){
   noteStore.togglePinNote(props.note.id);
 }
 
 function handleEditorClick(){
+   router.push({ name: 'edit', params: { id: props.note.id } });
 }
 
 function handleDeleteClick(){

@@ -166,6 +166,11 @@ export const useNoteStore = defineStore('note', () => {
             note.pinned = !note.pinned;
         }
     }
+
+    function getNoteById(id:string){
+        return state.value.notes.find(note=>note.id === id);
+    }
+
     //设置标签
     function setNotes(notes: Note[]) {
         state.value.notes = notes;
@@ -332,6 +337,7 @@ export const useNoteStore = defineStore('note', () => {
         activeNotes,
         trashNotes,
         trashConfig,
+        getNoteById,
         setNotes,
         setSearchQuery,
         addNote,

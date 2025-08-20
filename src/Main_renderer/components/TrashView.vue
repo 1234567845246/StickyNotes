@@ -6,7 +6,7 @@
         <button @click="emptyTrash" :disabled="trash.length === 0" class="empty-btn">
           <span class="icon">🗑️</span> {{ t('emptytrash') }}
         </button>
-        <button @click="$emit('close')" class="close-btn">
+        <button @click="close" class="close-btn">
           <span class="icon">←</span>{{ $t('back') }}
         </button>
       </div>
@@ -53,7 +53,10 @@
 import { computed } from 'vue';
 import { useNoteStore } from '../store/store';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
+
 const { t } = useI18n();
+const router = useRouter();
 
 const noteStore = useNoteStore();
 const retentionDays = computed(() => noteStore.trashConfig.retentionDays);
@@ -61,6 +64,10 @@ const trash = computed(() => noteStore.trashNotes);
 
 function restoreNote(id: string) {
   noteStore.restoreFromTrash(id);
+}
+
+function close() {
+  router.push({ name: 'home' });
 }
 
 function deletePermanently(id: string) {
@@ -104,7 +111,7 @@ function remainingDays(date: Date) {
   border-radius: 12px;
   padding: 20px;
   box-shadow: var(--shadow);
-  height: 100%;
+  height: calc(-40px + 100%);
   display: flex;
   flex-direction: column;
 }

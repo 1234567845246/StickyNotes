@@ -2,22 +2,17 @@
 
   <div class="app-container">
     <div class="sidebar-wrapper" :class="{ 'sidebar-visible': showSidebar }">
-      <Sidebar :show="showSidebar" @close="showSidebar = false" @create-note="createNewNote"
-        @toggle-tag-manager="showTagManager = !showTagManager"
-        @show-trash="showTrashView = true" />
+      <Sidebar :show="showSidebar" @close="showSidebar = false"  />
     </div>
     <div class="main-content" :class="{ 'main-narrow': showSidebar }">
       <AppHeader @toggle-sidebar="showSidebar = !showSidebar" @create-note="createNewNote" />
       <div class="content-area">
-        <TrashView v-if="showTrashView" @restore-note="restoreNoteFromTrash" @delete-permanently="deleteNotePermanently"
-          @empty-trash="emptyTrash" @close="showTrashView = false" />
-        <NoteEditor v-else-if="showEditor && selectedNote" :note="selectedNote" @save="saveNote" @close="closeEditor" />
-        <NoteList v-else @edit-note="editNote" @delete-note="deleteNote" @toggle-pin="togglePinNote" />
+          <RouterView/>
       </div>
     </div>
 
    
-    <TagManager  v-model="showTagManager"/>
+
     
   
 
@@ -28,115 +23,22 @@
 </template>
 
 <script setup lang="ts">
-import {  onMounted, ref } from 'vue';
-import NoteList from '../components/NoteList.vue';
-import TagManager from '../components/TagManager.vue';
-import NoteEditor from '../components/NoteEditor.vue';
-import TrashView from "../components/TrashView.vue";
+import { ref ,onMounted} from 'vue';
+import { useRouter } from 'vue-router';
+import { RouterView } from 'vue-router';
 import Sidebar from '../components/Sidebar.vue';
 import AppHeader from '../components/Appheader.vue';
-import { useI18n } from 'vue-i18n';
 import { useNoteStore, useTagStore } from '../store/store';
-import { Note } from '../../type';
 
+const router = useRouter();
 const noteStore = useNoteStore();
 const tagStore = useTagStore();
 
-//当前选中的便签(用于编辑)
-const selectedNote = ref<Note | null>(null);
-
-
-const showEditor = ref(false);
-const showTagManager = ref(false);
 const showSidebar = ref(false);
 
-// 添加回收站视图状态
-const showTrashView = ref(false);
-
-
-
-const { t } = useI18n();
-
-
+// 创建新笔记路由跳转
 function createNewNote() {
-  selectedNote.value = {
-    id: Date.now().toString(),
-    title: t('newNoteTitle'),
-    content: '',
-    tags: [],
-    color: getRandomColor(),
-    pinned: false,
-    deleted: false,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
-  showEditor.value = true;
-}
-
-//编辑便签
-function editNote(note: Note) {
-  selectedNote.value = { ...note };
-  showEditor.value = true;
-}
-
-//保存便签
-function saveNote(note: Note) {
-  if (note.id) {
-    noteStore.updateNote(note.id, note);
-  } else {
-    noteStore.addNote(note);
-  }
-  closeEditor();
-}
-
-
-
-// 从回收站恢复
-function restoreNoteFromTrash(noteId: string) {
-  noteStore.restoreFromTrash(noteId);
-};
-
-// 永久删除
-function deleteNotePermanently(noteId: string) {
-  noteStore.deletePermanently(noteId);
-};
-
-// 清空回收站
-function emptyTrash() {
-  noteStore.emptyTrash();
-  showTrashView.value = false; // 关闭回收站视图
-};
-
-//删除便签
-function deleteNote(noteId: string) {
-  noteStore.removeNote(noteId);
-}
-
-
-//关闭编辑器
-function closeEditor() {
-  showEditor.value = false;
-  selectedNote.value = null;
-}
-
-//切换便签置顶状态
-function togglePinNote(noteId: string) {
-  const note = noteStore.notes.find(n => n.id === noteId);
-  if (note) {
-    noteStore.updateNote(noteId, { pinned: !note.pinned })
-  }
-}
-
-
-function getRandomColor() {
-  const colors = ['#fff9c4', // 黄色
-    '#c8e6c9', // 绿色
-    '#bbdefb', // 蓝色
-    '#f8bbd0', // 粉色
-    '#e1bee7', // 紫色
-    '#ffccbc'  // 橙色
-  ]
-  return colors[Math.floor(Math.random() * colors.length)];
+  router.push({ name: 'create' });
 }
 
 onMounted(() => {

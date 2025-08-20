@@ -11,10 +11,10 @@
       <div class="sidebar-section">
         <h3>{{ $t('note') }}</h3>
         <ul class="sidebar-menu">
-          <li @click="emit('create-note')">
+          <li @click="createNote()">
             <span class="icon">📝</span> {{ $t('newNoteTitle') }}
           </li>
-          <li @click="emit('show-trash')">
+          <li @click="showTrash()">
             <span class="icon">
               🗑️
             </span>
@@ -29,14 +29,14 @@
       <div class="sidebar-section">
         <h3>{{ $t('tagclass') }}</h3>
         <ul class="sidebar-menu">
-          <li @click="tagStore.selectTag(null)">
+          <li @click="showAllNote(null)">
             <span class="icon">📋</span> {{ $t('allnote') }}
           </li>
-          <li v-for="tag in tagStore.tags" :key="tag.id" @click="tagStore.selectTag(tag.id)">
+          <li v-for="tag in tagStore.tags" :key="tag.id" @click="showAllNote(tag.id)">
             <span class="tag-color" :style="{ backgroundColor: tag.color }"></span>
             {{ tag.name }}
           </li>
-          <li @click="emit('toggle-tag-manager')">
+          <li @click="ShowTagManager()">
             <span class="icon">⚙️</span> {{ $t('tagmanage') }}
           </li>
         </ul>
@@ -46,27 +46,50 @@
           {{ $t('about') }}
         </button>
       </div>
-
     </div>
   </div>
+   <TagManager  v-model="showTagManager"/>
 </template>
 
 <script setup lang="ts">
 import { useTagStore, useNoteStore } from '../store/store';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
+import TagManager from './TagManager.vue';
 const { t } = useI18n();
-
+const showTagManager = ref(false);
+const router = useRouter();
 defineProps<{
   show: boolean
 }>()
 
-const emit = defineEmits(['close', 'create-note', 'toggle-tag-manager','show-trash']);
+const emit = defineEmits(['close']);
 
 const noteStore = useNoteStore();
 const tagStore = useTagStore();
 
 const trashCount = computed(() => noteStore.trashNotes.length);
+
+// 创建新笔记
+function createNote() {
+  router.push({ name: 'create' });
+}
+
+// 显示回收站
+function showTrash() {
+  router.push({ name: 'trash' });
+}
+
+// 显示所有笔记
+function showAllNote(tagId:string|null){
+  tagStore.selectTag(tagId);
+  router.push({name:'home'});
+}
+
+function ShowTagManager(){
+    showTagManager.value = true;
+}
 
 function showabout() {
   window.electronAPI.showAbout();
