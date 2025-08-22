@@ -1,5 +1,5 @@
 <template>
-  <CustomDialog v-model="props.modelValue" @close="closConfigPanel()">
+  <CustomDialog v-model="model" @close="closConfigPanel()">
     <template #title>
       <span>{{ t('config.title') }}</span>
     </template>
@@ -27,49 +27,15 @@
               </select>
             </p>
             <label>
-              {{ $t('config.visabledatatype') }}
+              {{ $t('config.trashconfig') }}
             </label>
-            <CustomCheckbox v-model="tempConfig.is8BitInteger">
-              {{ $t('config.is8BitInteger') }}
+            <CustomCheckbox v-model="tempConfig.autoClean">
+              {{ $t('config.autoclean') }}
             </CustomCheckbox>
-            <CustomCheckbox v-model="tempConfig.is16BitInteger">
-              {{ $t('config.is16BitInteger') }}
-            </CustomCheckbox>
-            <CustomCheckbox v-model="tempConfig.is32BitInteger">
-              {{ $t('config.is32BitInteger') }}
-            </CustomCheckbox>
-            <CustomCheckbox v-model="tempConfig.is64BitInteger">
-              {{ $t('config.is64BitInteger') }}
-            </CustomCheckbox>
-            <CustomCheckbox v-model="tempConfig.is16BitFloat">
-              {{ $t('config.is16BitFloat') }}
-            </CustomCheckbox>
-            <CustomCheckbox v-model="tempConfig.is32BitFloat">
-              {{ $t('config.is32BitFloat') }}
-            </CustomCheckbox>
-            <CustomCheckbox v-model="tempConfig.is64BitFloat">
-              {{ $t('config.is64BitFloat') }}
-            </CustomCheckbox>
-            <CustomCheckbox v-model="tempConfig.isUtf8Encoding">
-              {{ $t('config.isUtf8Encoding') }}
-            </CustomCheckbox>
-
-          </div>
-          <div class="grid_item adjoin-child-margins v-align-top">
             <label>
-              {{ $t('config.addressOffsetBase') }}
+              {{ $t('config.retentiondays') }}
             </label>
-            <p>
-              <select class="select" v-model="tempConfig.addressOffsetBase" autocomplete="off">
-                <option value="bin">{{ $t('config.bin') }}</option>
-                <option value="otc">{{ $t('config.otc') }}</option>
-                <option value="dec">{{ $t('config.dec') }}</option>
-                <option value="hex">{{ $t('config.hex') }}</option>
-              </select>
-            </p>
-            <CustomCheckbox v-model="tempConfig.hideAddressOffsetLeadingZeros">
-              {{ $t('config.hideAddressOffsetLeadingZeros') }}
-            </CustomCheckbox>
+            <IntegerInput v-model="tempConfig.retentionDays" :min="0" :max="30" />
           </div>
         </div>
       </div>
@@ -79,7 +45,7 @@
         </div>
         <div class="grid_item h-align-right v-align-bottom" style="grid-auto-flow: column">
           <button class="button primary_button" style="margin-left: 10px;" @click="saveConfig">{{ $t('save')
-            }}</button>
+          }}</button>
           <button class="button" style="margin-left: 10px;" @click="closConfigPanel();">{{ $t('cancel') }}</button>
         </div>
       </div>
@@ -91,6 +57,7 @@ import { ref, onMounted, watch } from 'vue';
 import { Config } from '../../type';
 import CustomDialog from './CustomDialog.vue';
 import CustomCheckbox from "./CustomCheckbox.vue"
+import IntegerInput from './IntegerInput.vue';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 const emit = defineEmits(['close'])
@@ -102,21 +69,15 @@ const tempConfig = ref(configStore.config);
 
 watch(() => configStore.config, (newConfig: Config) => {
   if (newConfig) {
-    tempConfig.value = JSON.parse(JSON.stringify(newConfig)) ;
+    tempConfig.value = JSON.parse(JSON.stringify(newConfig));
   }
 }, { immediate: true, deep: true }
 )
 
-const props = defineProps({
-  modelValue: {
-    type: Boolean,
-    required: true,
-    default: false
-  }
-});
+ const model =  defineModel<boolean>({ required: true })
 
 function setLanguage() {
-  window.electronAPI.restart({language:tempConfig.value.language});
+  window.electronAPI.restart({ language: tempConfig.value.language });
 }
 
 async function saveConfig() {

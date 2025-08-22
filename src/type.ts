@@ -2,22 +2,11 @@ export const defaultconfig: Config = {
   theme: 'light',
   language: 'zh',
   retentionDays: 30,
-  autoClean: false,
-  is8BitInteger: false,
-  is16BitInteger: false,
-  is32BitInteger: false,
-  is64BitInteger: false,
-  is16BitFloat: false,
-  is32BitFloat: false,
-  is64BitFloat: false,
-  isUtf8Encoding: false,
-  addressOffsetBase: 'hex',
-  hideAddressOffsetLeadingZeros: false
+  autoClean: true,
 }
 
 export type Theme = 'system' | 'light' | 'dark'
 export type Language = 'zh' | 'en'
-export type NumberalBase = 'bin' | 'otc' | 'dec' | 'hex'
 
 // 回收站配置
 export interface TrashConfig {
@@ -30,16 +19,7 @@ export interface Config {
   language: Language;
   retentionDays: number; // 保留天数（默认30天）
   autoClean: boolean;    // 是否自动清理
-  is8BitInteger: boolean;
-  is16BitInteger: boolean;
-  is32BitInteger: boolean;
-  is64BitInteger: boolean;
-  is16BitFloat: boolean;
-  is32BitFloat: boolean;
-  is64BitFloat: boolean;
-  isUtf8Encoding: boolean;
-  addressOffsetBase: NumberalBase;
-  hideAddressOffsetLeadingZeros: boolean;
+
 }
 export interface Tag {
   id: string;

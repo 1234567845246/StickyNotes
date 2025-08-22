@@ -48,7 +48,7 @@
       </div>
     </div>
   </div>
-   <TagManager  v-model="showTagManager"/>
+   <TagManager v-model="showTagManager"/>
 </template>
 
 <script setup lang="ts">

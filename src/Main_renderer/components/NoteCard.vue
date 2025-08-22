@@ -1,9 +1,6 @@
 <template>
   <div class="note-card" :style="{ backgroundColor: note.color }">
-    <div v-if="isEditting" class="edior-container">
-
-    </div>
-    <div v-else>
+    <div>
       <div class="card-header">
         <h3 class="note-title">
           {{ note.title }}
@@ -39,7 +36,7 @@
 
 <script setup lang="ts">
 
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { Note } from '../../type';
 import { useNoteStore, useTagStore } from '../store/store';
 import { useI18n } from 'vue-i18n';
@@ -51,9 +48,7 @@ const router = useRouter();
 const props = defineProps<{ note: Note }>();
 const tagStore = useTagStore();
 const noteStore = useNoteStore();
-const isEditting = ref<boolean>(false);
 
-const emit = defineEmits(['edit']);
 
 function togglePin(){
   noteStore.togglePinNote(props.note.id);

@@ -1,7 +1,7 @@
 <template>
   <!-- <router-view /> -->
    <HomeView/>
-  <ConfigPanel v-model="showConfig" @close="showConfig = false" />
+  <ConfigPanel v-model="showConfig"/>
 </template>
 
 <script setup lang="ts">
