@@ -82,17 +82,12 @@ app.whenReady().then(() => {
     })
 
     protocol.handle('image', async (req) => {
-        console.log(req.url);
         let filePath:string = req.url.slice('image://'.length);
-
         if(platform() === 'win32'){
             if(filePath.at(1) !== ':'){
                filePath = insertChar(filePath,1,":");
             }
         }
-
-        console.log(filePath);
-
         if (!existsSync(filePath)) {
             return new Response('File not found', {
                 status: 404,

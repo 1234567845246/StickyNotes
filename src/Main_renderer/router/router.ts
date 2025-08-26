@@ -1,5 +1,7 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import NoteList from '../components/NoteList.vue';
+import TrashView from '../components/TrashView.vue';
+import NoteEditor from '../components/NoteEditor.vue';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -9,16 +11,16 @@ const routes: RouteRecordRaw[] = [
   }, {
     path: '/trash',
     name: 'trash',
-    component: import('../components/TrashView.vue')
+    component: TrashView
   }, {
     path: '/edit/:id',
     name: 'edit',
-    component: import('../components/NoteEditor.vue'),
+    component: NoteEditor,
     props: true
   }, {
     path: '/create',
     name: 'create',
-    component: import('../components/NoteEditor.vue'),
+    component: NoteEditor,
     props: { isNew: true }
   }
 ];

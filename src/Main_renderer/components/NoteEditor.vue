@@ -14,14 +14,15 @@
         </div>
       </div>
 
-      <button @click="showTagSelector = true" class="add-tag-btn">
+      <button @click="showTagSelector = true"  class="add-tag-btn">
         + {{ $t('addtag') }}
       </button>
     </div>
 
     <div class="content-editor">
-      <MdEditor v-model="editedNote.content" ref="editorRef" :language="language" :theme="theme" :preview-theme="previewTheme"
-        :toolbars="toolbars" style="height: calc(-50px + 100%);" :onHtmlChanged="handleHtmlChange"  @onDrop="handleDrag">
+      <MdEditor v-model="editedNote.content" ref="editorRef" :language="language" :theme="theme"
+        :preview-theme="previewTheme" :toolbars="toolbars" style="height: calc(-50px + 100%);"
+        :onHtmlChanged="handleHtmlChange" @onDrop="handleDrag" @onUploadImg="handleUploadImg">
         <template #defToolbars>
           <Emoji>
             <template #trigger> Emoji </template>
@@ -35,13 +36,12 @@
 
     </div>
 
-    <TagSelector v-model="showTagSelector" :current-tags="editedNote.tags" @add="addTag"
-      @close="showTagSelector = false" />
+    <TagSelector v-model="showTagSelector" :current-tags="editedNote.tags" @add="addTag" />
   </div>
 
 </template>
 <script setup lang="ts">
-import { ref, useTemplateRef } from 'vue';
+import { onMounted, ref, useTemplateRef } from 'vue';
 import { useNoteStore, useTagStore } from '../store/store';
 import { Note } from '../../type';
 import { useI18n } from 'vue-i18n';
@@ -60,7 +60,7 @@ import ExportToolBar from './ExportToolBar.vue';
 import ImportTooBar from './ImportTooBar.vue';
 
 import { Emoji, PreviewThemeSwitch, ThemeSwitch } from '@vavt/v3-extension';
-import { MdEditor, config, PreviewThemes, Themes, ToolbarNames ,ExposeParam} from 'md-editor-v3';
+import { MdEditor, config, PreviewThemes, Themes, ToolbarNames, ExposeParam } from 'md-editor-v3';
 
 const editorRef = useTemplateRef<ExposeParam>('editorRef');
 const route = useRoute();
@@ -105,6 +105,64 @@ const toolbars: ToolbarNames[] = [
   1,
   2
 ];
+onMounted(() => {
+  editorRef.value?.domEventHandlers({
+    paste(event, view) {
+
+      const clipboardItems = event.clipboardData?.items;
+      if (!clipboardItems) return;
+      for (let i = 0; i < clipboardItems.length; i++) {
+        let item = clipboardItems[i];
+        if (item.kind === 'file' && item.type.startsWith('image/')) {
+          event.preventDefault();
+
+          const file = item.getAsFile();
+          if (!file) return;
+          let filepath = window.electronAPI.getPathForFile(file);
+          const state = view.state;
+          const seletion = state.selection.main;
+          const currentPos = seletion.head;
+          if (filepath !== '') {
+            const template = `![](image://${filepath})`;
+            const anchor = currentPos + template.length;
+            view.dispatch({
+              changes: {
+                from: currentPos,
+                to: currentPos,
+                insert: template
+              },
+              selection: { anchor },
+              scrollIntoView: true
+            })
+            view.focus();
+          } else {
+            readFileAsBase64(file).then((base64: string) => {
+              if (base64 !== '') {
+                const template = `![](${base64})`;
+                const anchor = currentPos + template.length;
+                view.dispatch({
+                  changes: {
+                    from: currentPos,
+                    to: currentPos,
+                    insert: template
+                  },
+                  selection: { anchor },
+                  scrollIntoView: true
+                })
+                view.focus();
+
+              }
+            })
+          }
+
+          break;
+        }
+      }
+    }
+  })
+})
+
+
 
 config({
   editorExtensions: {
@@ -168,7 +226,6 @@ function saveNote() {
   } else {
     noteStore.addNote(editedNote.value);
   }
-  // router.push({ name: 'home' });
 }
 
 function closeEditor() {
@@ -186,7 +243,7 @@ function getRandomColor() {
   return colors[Math.floor(Math.random() * colors.length)];
 }
 
-function createDefaultNote():Note {
+function createDefaultNote(): Note {
   return {
     id: Date.now().toString(),
     title: t('newNoteTitle'),
@@ -202,10 +259,7 @@ function createDefaultNote():Note {
 
 //添加标签
 function addTag(tagId: string) {
-  if (editedNote.value.tags.includes(tagId)) {
-    editedNote.value.tags = [...editedNote.value.tags, tagId];
-  }
-  saveNote();
+  useNoteStore().addTagToNote(editedNote.value.id,tagId)
 }
 
 function handleHtmlChange(h: string) {
@@ -214,36 +268,63 @@ function handleHtmlChange(h: string) {
 
 
 function removeTag(tagId: string) {
-  editedNote.value.tags = editedNote.value.tags.filter(id => id !== tagId);
-  saveNote();
+  useNoteStore().removeTagFromNote(editedNote.value.id,tagId);
 }
 
 function updateContent(field: 'title' | 'content', value: any) {
   editedNote.value[field] = value;
   saveNote();
 }
-function handleDrag(e:DragEvent){
+
+function readFileAsBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+    reader.readAsDataURL(file);
+  });
+}
+
+function handleDrag(e: DragEvent) {
   e.preventDefault();
-  if(e.dataTransfer !== null){
-    if(e.dataTransfer.files.length  > 0){
-      const files =  e.dataTransfer.files;
-      for(let i = 0; i< files.length ;i++){
+  if (e.dataTransfer !== null) {
+    if (e.dataTransfer.files.length > 0) {
+      const files = e.dataTransfer.files;
+      for (let i = 0; i < files.length; i++) {
         const file = files[i];
 
-        if(file.type.startsWith('image/')){
-            let filepath = window.electronAPI.getPathForFile(file);
-            if(filepath !== ''){
-              editorRef.value?.insert(()=>{
-                return {
-                  targetValue:`![](image://${filepath})`,
-                  select:false
-                }
-              });
-            }
+        if (file.type.startsWith('image/')) {
+          let filepath = window.electronAPI.getPathForFile(file);
+          if (filepath !== '') {
+            editorRef.value?.insert(() => {
+              return {
+                targetValue: `![](image://${filepath})`,
+                select: false
+              }
+            });
+          }
         }
       }
     }
   }
+}
+
+async function handleUploadImg(files: Array<File>, callback: (urls: string[] | { url: string; alt: string; title: string }[]) => void) {
+  const res =await Promise.all(
+    files.map(file=>{
+        return new Promise((resolve)=>{
+            let filepath = window.electronAPI.getPathForFile(file);
+            if(filepath !== ''){
+              resolve(`image://${filepath}`)
+            }else{
+              readFileAsBase64(file).then((base64:string)=>{
+                resolve(base64)
+              })
+            }
+        })
+    })
+  ) as string[];
+  callback(res)
 }
 
 

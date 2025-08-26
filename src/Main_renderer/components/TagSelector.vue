@@ -1,5 +1,5 @@
 <template>
-    <CustomDialog v-model="props.modelValue">
+    <CustomDialog v-model="modelValue">
         <template #title>
             <span>{{ t('selecttag') }}</span>
         </template>
@@ -24,12 +24,13 @@ import { useTagStore } from '../store/store';
 
 const tagStore = useTagStore();
 
+const modelValue = defineModel<boolean>({required:true})
+
 const props = defineProps<{
     currentTags: string[],
-    modelValue:boolean
 }>();
 
-const emit = defineEmits(['add', 'close']);
+const emit = defineEmits(['add']);
 
 //过滤掉以添加的标签
 const avaliableTags = computed(() => {
@@ -39,7 +40,7 @@ const avaliableTags = computed(() => {
 //添加标签
 function addTag(tagId: string) {
     emit('add', tagId);
-    emit('close');
+    modelValue.value =false;
 }
 
 </script>
