@@ -1,5 +1,5 @@
-import { contextBridge, ipcRenderer ,webUtils} from "electron";
-import { Config, Note, Theme } from "../type";
+import { contextBridge, ipcRenderer, webUtils } from "electron";
+import { Config, Note, Theme, Tag } from "../type";
 
 function parseArgv(key: string) {
     for (const arg of process.argv) {
@@ -16,12 +16,17 @@ function parseArgv(key: string) {
 export declare interface ElectronAPI {
 
 
-    getNotes: () => Promise<any>;
-    saveNote: (note: Note) => Promise<any>;
-    deleteNote: (id: string) => Promise<any>;
+    getNotes: () => Promise<Note[]>;
+    saveNote: (note: Note) => Promise<boolean>;
+    deleteNote: (id: string) => Promise<boolean>;
+    updateNote: (note: Partial<Note>) => Promise<boolean>;
     createNote: (callback: (...args: any[]) => void) => void;
+
+    getTags: () => Promise<Tag[]>;
+    saveTag: (tag: Tag) => Promise<boolean>;
+    deleteTag: (id: string) => Promise<boolean>;
     showAbout: () => void;
-    restart:(newConfig: Partial<Config>)=>void;
+    restart: (newConfig: Partial<Config>) => void;
 
     configurate: () => Config;
     readConfig: () => Promise<any>;
@@ -38,9 +43,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getNotes: () => ipcRenderer.invoke('get-notes'),
     saveNote: (note: Note) => ipcRenderer.invoke('save-note', note),
     deleteNote: (id: string) => ipcRenderer.invoke('delete-note', id),
+    updateNote: (note: Partial<Note>) => ipcRenderer.invoke('update-note', note),
     createNote: (callback: (...args: any[]) => void) => ipcRenderer.on('create-note', callback),
-    showAbout:()=>ipcRenderer.send('show-about'),
-    restart:(newConfig: Partial<Config>)=>ipcRenderer.send('restart',newConfig),
+    getTags: () => ipcRenderer.invoke('get-tags'),
+    saveTag: (tag: Tag) => ipcRenderer.invoke('save-tag', tag),
+    deleteTag: (id: string) => ipcRenderer.invoke('delete-tag', id),
+    showAbout: () => ipcRenderer.send('show-about'),
+    restart: (newConfig: Partial<Config>) => ipcRenderer.send('restart', newConfig),
     configurate: () => parseArgv('window-config'),
     readConfig: () => ipcRenderer.invoke('read-config'),
     writeConfig: (config: Config) => ipcRenderer.invoke('write-config', config),
@@ -48,6 +57,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
     setLanguage: (language: string) => ipcRenderer.send('set-language', language),
     onOpenConfigPage: (cb: (...args: any[]) => void) => ipcRenderer.on('open-config-page', cb),
 
-    getPathForFile:(file:File)=>  webUtils.getPathForFile(file).replace(/\\/g, "/"),
+    getPathForFile: (file: File) => webUtils.getPathForFile(file).replace(/\\/g, "/"),
 } as ElectronAPI);
 

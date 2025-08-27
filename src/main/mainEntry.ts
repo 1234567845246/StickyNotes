@@ -2,18 +2,17 @@
 import { app, BrowserWindow, dialog, ipcMain, nativeImage, nativeTheme, protocol } from "electron";
 import { join, isAbsolute, extname } from "path";
 import { MenuManager } from "./MenuManager";
-import { NotesManager } from "./notes";
+import { database } from "./db"
 import { configManager } from "./Config";
-import { Language, Theme, Note, Config } from "../type";
+import { Language, Theme, Note, Config, Tag } from "../type";
 import { i18n } from "./I18n";
 import { existsSync, readFileSync } from "fs";
 import { platform } from "os";
 import { insertChar } from "../tools";
 
-app.setPath('userData', join(app.getPath('appData'), 'StickyNotes'));
 let mainWindow: BrowserWindow;
 let menuManguage: MenuManager;
-let notes: NotesManager = new NotesManager();
+
 
 protocol.registerSchemesAsPrivileged([{
     scheme: 'image', privileges: {
@@ -21,71 +20,40 @@ protocol.registerSchemesAsPrivileged([{
         secure: true,
         supportFetchAPI: true
     }
+}, {
+    scheme: 'app', privileges: {
+        standard: true,
+        secure: true,
+        stream: true,
+        supportFetchAPI: true,
+        bypassCSP: true,
+        corsEnabled: true
+    }
 }])
 
-app.whenReady().then(() => {
-    let config = configManager.getConfig();
-    mainWindow = new BrowserWindow({
-        minHeight: 800,
-        minWidth: 1250,
-        width: 1450,
-        height: 800,
-        title: i18n.t('title'),
-        icon: nativeImage.createFromPath(join(__dirname, '../public/notes.png')),
-        webPreferences: {
-            preload: join(__dirname, 'preload_main.js'),
-            nodeIntegration: true,
-            webSecurity: true,
-            sandbox: true,
-            allowRunningInsecureContent: false,
-            contextIsolation: true,
-            webviewTag: true,
-            spellcheck: false,
-            disableHtmlFullscreenWindowResize: true,
-            additionalArguments: [`--window-config=${JSON.stringify(config)}`],
-        },
-    });
-    mainWindow.webContents.session.enableNetworkEmulation({
-        offline: false,
-        latency: 0,
-        downloadThroughput: 0,
-        uploadThroughput: 0
-    });
 
-    menuManguage = new MenuManager(mainWindow);
-    nativeTheme.themeSource = config.theme;
-    mainWindow.loadURL(process.argv[2]);
-    mainWindow.webContents.openDevTools();
-
-    ipcMain.handle('read-config', () => configManager.getConfig());
-    ipcMain.handle('write-config', (_, config) => configManager.setConfig(config));
-    ipcMain.on('set-theme-source', (_, theme: Theme) => {
-        nativeTheme.themeSource = theme
-    })
-    ipcMain.on('set-language', (_, language: Language) => {
-        configManager.setConfig({ language });
-    })
-
-    ipcMain.handle('get-notes', () => {
-        return notes.getNotes();
-    })
-
-    ipcMain.handle('save-note', async (_, note: Note) => {
-        return await notes.saveNote(note);
-    });
-    ipcMain.handle('delete-note', async (_, noteId: string) => {
-        return await notes.deleteNote(noteId);
-    });
-
-    ipcMain.on('show-about', () => {
-        menuManguage.showAbout();
+function RegisterProtocol() {
+    protocol.handle('app', (req) => {
+        let { pathname } = new URL(req.url);
+        let extension = extname(pathname).toLowerCase();
+        if (extension === '') {
+            pathname = 'index.html';
+            extension = '.html'
+        }
+        const tarFile = join(__dirname, pathname);
+        return new Response(readFileSync(tarFile), {
+            headers: {
+                'content-type': getMimeType(extension)
+            },
+            status: 200
+        })
     })
 
     protocol.handle('image', async (req) => {
-        let filePath:string = req.url.slice('image://'.length);
-        if(platform() === 'win32'){
-            if(filePath.at(1) !== ':'){
-               filePath = insertChar(filePath,1,":");
+        let filePath: string = req.url.slice('image://'.length);
+        if (platform() === 'win32') {
+            if (filePath.at(1) !== ':') {
+                filePath = insertChar(filePath, 1, ":");
             }
         }
         if (!existsSync(filePath)) {
@@ -119,6 +87,87 @@ app.whenReady().then(() => {
             }
         });
 
+    })
+}
+
+
+app.whenReady().then(() => {
+    let config = configManager.getConfig();
+    mainWindow = new BrowserWindow({
+        minHeight: 800,
+        minWidth: 1250,
+        width: 1450,
+        height: 800,
+        title: i18n.t('title'),
+        icon: nativeImage.createFromPath(join(__dirname, '../public/notes.png')),
+        webPreferences: {
+            preload: join(__dirname, 'preload_main.js'),
+            nodeIntegration: true,
+            webSecurity: true,
+            sandbox: true,
+            allowRunningInsecureContent: false,
+            contextIsolation: true,
+            webviewTag: true,
+            spellcheck: false,
+            disableHtmlFullscreenWindowResize: true,
+            additionalArguments: [`--window-config=${JSON.stringify(config)}`],
+        },
+    });
+    mainWindow.webContents.session.enableNetworkEmulation({
+        offline: false,
+        latency: 0,
+        downloadThroughput: 0,
+        uploadThroughput: 0
+    });
+    RegisterProtocol();
+    menuManguage = new MenuManager(mainWindow);
+    nativeTheme.themeSource = config.theme;
+    if (process.argv[2]) {
+        mainWindow.loadURL(process.argv[2]);
+    } else {
+        mainWindow.loadURL('app://index.html');
+    }
+    mainWindow.webContents.openDevTools();
+
+    ipcMain.handle('read-config', () => configManager.getConfig());
+    ipcMain.handle('write-config', (_, config) => configManager.setConfig(config));
+    ipcMain.on('set-theme-source', (_, theme: Theme) => {
+        nativeTheme.themeSource = theme
+    })
+    ipcMain.on('set-language', (_, language: Language) => {
+        configManager.setConfig({ language });
+    })
+
+    ipcMain.handle('get-notes', () => {
+        return database.getNotes();
+    })
+
+    ipcMain.handle('save-note', async (_, note: Note) => {
+        return await database.saveNote(note);
+    })
+
+    ipcMain.handle('delete-note', async (_, id: string) => {
+        return await database.deleteNote(id);
+    })
+
+    ipcMain.handle('update-note', async (_, note: Partial<Note>) => {
+        return await database.updateNote(note);
+    });
+
+    ipcMain.handle('get-tags', () => {
+        return database.getTags();
+    });
+
+    ipcMain.handle('save-tag', async (_, tag: Tag) => {
+        return await database.saveTag(tag);
+    });
+
+    ipcMain.handle('delete-tag', async (_, tagId: string) => {
+        return await database.deleteTag(tagId);
+    });
+
+    ipcMain.on('show-about', () => {
+        menuManguage.showAbout();
     })
 
 
@@ -156,8 +205,11 @@ function getMimeType(filePath: string) {
         ['.gif', 'image/gif'],
         ['.webp', 'image/webp'],
         ['.bmp', 'image/bmp'],
-        ['.svg', 'image/svg+xml']
-        // 添加其他需要支持的图片类型
+        ['.svg', 'image/svg+xml'],
+        ['.js', 'text/javascript'],
+        ['.html', 'text/html'],
+        ['.css', 'text/css'],
+        ['.json', 'application/json']
     ]);
     return mimeMap.get(ext) || 'application/octet-stream';
 }

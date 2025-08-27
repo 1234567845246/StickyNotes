@@ -51,28 +51,44 @@ export const useTagStore = defineStore('tag', () => {
     const selectedTag = computed(() => state.value.selectedTag);
 
     //添加标签
-    function addTag(tag: Omit<Tag, 'id' | 'createdAt' | 'updatedAt'>) {
+    async function addTag(tag: Omit<Tag, 'id' | 'createdAt' | 'updatedAt'>) {
         const newTag = {
             ...tag,
             id: crypto.randomUUID(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
-        state.value.tags.push(newTag);
+        // 保存到数据库
+        const success = await window.electronAPI.saveTag(newTag);
+        if (success) {
+            state.value.tags.push(newTag);
+        }
     }
     // 删除标签
-    function removeTag(tagId: string) {
-        state.value.tags = state.value.tags.filter(tag => tag.id !== tagId);
+    async function removeTag(tagId: string) {
+        // 从数据库删除
+        const success = await window.electronAPI.deleteTag(tagId);
+        if (success) {
+            state.value.tags = state.value.tags.filter(tag => tag.id !== tagId);
+        }
     }
     // 更新标签
-    function updateTag(tagId: string, update: Partial<Omit<Tag, 'id'>>) {
+    async function updateTag(tagId: string, update: Partial<Omit<Tag, 'id'>>) {
         const index = state.value.tags.findIndex(tag => tag.id === tagId);
         if (index !== -1) {
-            state.value.tags[index] = {
+            const updatedTag = {
                 ...state.value.tags[index],
                 ...update,
                 updatedAt: new Date().toISOString()
             };
+
+            // 更新到数据库
+            const success = await window.electronAPI.saveTag(updatedTag);
+            if (success) {
+                state.value.tags[index] = updatedTag;
+            } else {
+                console.error('Failed to update tag in database');
+            }
         }
     }
     // 选择标签
@@ -93,14 +109,10 @@ export const useTagStore = defineStore('tag', () => {
 
     // 初始化标签
     // 这里可以添加一些默认标签
-    function initTags() {
-
-        addTag({ name: '工作', color: '#ffb74d' });
-        addTag({ name: '个人', color: '#4fc3f7' });
-        addTag({ name: '重要', color: '#f44336' });
-        addTag({ name: '学习', color: '#66bb6a' });
-        addTag({ name: '待办', color: '#ab47bc' });
-        addTag({ name: '其他', color: '#90a4ae' });
+    // 添加加载标签的方法
+    async function loadTags() {
+        const tags = await window.electronAPI.getTags();
+        state.value.tags = tags;
     }
 
     return {
@@ -113,7 +125,7 @@ export const useTagStore = defineStore('tag', () => {
         selectTag,
         getTagColor,
         getTagName,
-        initTags
+        loadTags
     }
 })
 
@@ -160,35 +172,62 @@ export const useNoteStore = defineStore('note', () => {
         state.value.searchQuery = query;
     }
     //切换初始状态
-    function togglePinNote(noteId: string) {
+    async function togglePinNote(noteId: string) {
         const note = state.value.notes.find(n => n.id === noteId);
         if (note) {
-            note.pinned = !note.pinned;
+            const updatedNote = {
+                ...note,
+                pinned: !note.pinned,
+                updatedAt: new Date().toISOString()
+            };
+
+            // 更新数据库
+            const success = await window.electronAPI.updateNote(updatedNote);
+            if (success) {
+                note.pinned = !note.pinned;
+            } else {
+                console.error('Failed to toggle pin status in database');
+            }
         }
     }
 
-    function getNoteById(id:string){
-        return state.value.notes.find(note=>note.id === id);
+
+
+    function getNoteById(id: string) {
+        return state.value.notes.find(note => note.id === id);
     }
+
 
     //设置标签
     function setNotes(notes: Note[]) {
         state.value.notes = notes;
     }
+
+
     // 添加便签
-    function addNote(note: Omit<Note, 'id' | 'createdAt' | 'updatedAt' | 'deleted' | 'pinned'>) {
+    async function addNote(note: Omit<Note, 'id' | 'createdAt' | 'updatedAt' | 'deleted' | 'pinned'>): Promise<Note | null> {
         const newNote: Note = {
             ...note,
             id: crypto.randomUUID(),
-            deleted: false,    // 新便签默认不在回收站
+            deleted: false,
             pinned: false,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
-        state.value.notes.push(newNote);
+
+        // 保存到数据库
+        console.log(newNote);
+        const success = await window.electronAPI.saveNote(newNote);
+        if (success) {
+            state.value.notes.push(newNote);
+            return newNote; // 返回新创建的便签
+        } else {
+            console.error('Failed to save note to database');
+            return null;
+        }
     }
     // 更新便签
-    function updateNote(noteId: string, update: Partial<Omit<Note, 'id'>>) {
+    async function updateNote(noteId: string, update: Partial<Omit<Note, 'id'>>) {
         const index = state.value.notes.findIndex(note => note.id === noteId);
         if (index !== -1) {
             const updatedNote = {
@@ -196,7 +235,12 @@ export const useNoteStore = defineStore('note', () => {
                 ...update,
                 updatedAt: new Date().toISOString()
             };
-            state.value.notes[index] = updatedNote;
+
+            // 更新到数据库
+            const success = await window.electronAPI.updateNote(updatedNote);
+            if (success) {
+                state.value.notes[index] = updatedNote;
+            }
         }
     }
 
@@ -205,20 +249,40 @@ export const useNoteStore = defineStore('note', () => {
         moveToTrash(noteId);
     }
     // 添加标签到便签
-    function addTagToNote(noteId: string, tagId: string) {
+    async function addTagToNote(noteId: string, tagId: string) {
         const note = state.value.notes.find(note => note.id === noteId);
         if (note && !note.tags.includes(tagId)) {
-            note.tags.push(tagId);
-            note.updatedAt = new Date().toISOString();
+            // 更新数据库
+            const success = await window.electronAPI.updateNote({
+                ...note,
+                tags: [...note.tags, tagId],
+                updatedAt: new Date().toISOString()
+            });
+
+            if (success) {
+                note.tags.push(tagId);
+                note.updatedAt = new Date().toISOString();
+            }
         }
     }
 
     // 从便签中移除标签
-    function removeTagFromNote(noteId: string, tagId: string) {
+    async function removeTagFromNote(noteId: string, tagId: string) {
         const note = state.value.notes.find(note => note.id === noteId);
         if (note) {
-            note.tags = note.tags.filter(id => id !== tagId);
-            note.updatedAt = new Date().toISOString();
+            // 更新数据库
+            const success = await window.electronAPI.updateNote({
+                ...note,
+                tags: note.tags.filter(id => id !== tagId),
+                updatedAt: new Date().toISOString()
+            });
+
+            if (success) {
+                note.tags = note.tags.filter(id => id !== tagId);
+                note.updatedAt = new Date().toISOString();
+            } else {
+                console.error('Failed to remove tag from note in database');
+            }
         }
     }
 
@@ -245,45 +309,66 @@ export const useNoteStore = defineStore('note', () => {
         });
 
     }
-    function moveToTrash(noteId: string) {
+    async function moveToTrash(noteId: string) {
         const index = state.value.notes.findIndex(n => n.id === noteId);
         if (index !== -1) {
-            state.value.notes[index] = {
+            const updatedNote = {
                 ...state.value.notes[index],
                 deleted: true,
                 deletedAt: new Date().toISOString(),
-                originalPosition: index      //保留原始位置
+                originalPosition: index,
+                updatedAt: new Date().toISOString()
+            };
+
+            // 更新数据库
+            const success = await window.electronAPI.updateNote(updatedNote);
+            if (success) {
+                state.value.notes[index] = updatedNote;
+            } else {
+                console.error('Failed to move note to trash in database');
             }
         }
     }
 
-    function restoreFromTrash(noteId: string) {
+    async function restoreFromTrash(noteId: string) {
         const noteIndex = state.value.notes.findIndex(n => n.id === noteId);
         if (noteIndex !== -1) {
             const note = state.value.notes[noteIndex];
-
-
             const restoredNote: Note = {
                 ...note,
                 deleted: false,
                 deletedAt: undefined,
-                originalPosition: undefined
-            }
+                originalPosition: undefined,
+                updatedAt: new Date().toISOString()
+            };
 
-            state.value.notes.splice(noteIndex, 1);
-            //恢复到原始位置（如果可能）
-            if (typeof note.originalPosition === 'number' && note.originalPosition < state.value.notes.length) {
-                state.value.notes.splice(note.originalPosition, 0, restoredNote);
+            // 更新数据库
+            const success = await window.electronAPI.updateNote(restoredNote);
+            if (success) {
+                state.value.notes.splice(noteIndex, 1);
+
+                // 恢复到原始位置（如果可能）
+                if (typeof note.originalPosition === 'number' && note.originalPosition < state.value.notes.length) {
+                    state.value.notes.splice(note.originalPosition, 0, restoredNote);
+                } else {
+                    // 添加到列表末尾
+                    state.value.notes.push(restoredNote);
+                }
             } else {
-                //添加到列表末尾
-                state.value.notes.push(restoredNote)
+                console.error('Failed to restore note from trash in database');
             }
         }
     }
 
     //永久删除
-    function deletePermanently(noteId: string) {
-        state.value.notes = state.value.notes.filter(note => note.id !== noteId);
+    async function deletePermanently(noteId: string) {
+        // 从数据库删除
+        const success = await window.electronAPI.deleteNote(noteId);
+        if (success) {
+            state.value.notes = state.value.notes.filter(note => note.id !== noteId);
+        } else {
+            console.error('Failed to delete note permanently from database');
+        }
     }
 
     //清空回收站
@@ -306,29 +391,10 @@ export const useNoteStore = defineStore('note', () => {
             return true;
         })
     }
-    function initNotes() {
-        // 初始化一些默认便签
-        addNote({
-            title: '欢迎使用 HexEditor',
-            content: '这是您的第一个便签！',
-            color: '#4fc3f7',
-            tags: [],
-
-        });
-        addNote({
-            title: '待办事项',
-            content: '1. 学习 Vue 3\n2. 完成项目文档',
-            color: '#ffb74d',
-            tags: [],
-
-        });
-        addNote({
-            title: '个人笔记',
-            content: '记录一些个人想法和灵感。',
-            color: '#66bb6a',
-            tags: [],
-
-        });
+    // 添加加载便签的方法
+    async function loadNotes() {
+        const notes = await window.electronAPI.getNotes();
+        state.value.notes = notes;
     }
     return {
         notes,
@@ -346,7 +412,7 @@ export const useNoteStore = defineStore('note', () => {
         addTagToNote,
         removeTagFromNote,
         filteredNotes,
-        initNotes,
+        loadNotes,
         togglePinNote,
 
         moveToTrash,

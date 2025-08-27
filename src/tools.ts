@@ -11,3 +11,14 @@ export function formatTime(timestamp: string) {
 export function insertChar(str:string,index:number,char:string){
     return str.substring(0,index) + char + str.substring(index);
 }
+
+export function getRandomColor() {
+  const colors = ['#fff9c4', // 黄色
+    '#c8e6c9', // 绿色
+    '#bbdefb', // 蓝色
+    '#f8bbd0', // 粉色
+    '#e1bee7', // 紫色
+    '#ffccbc'  // 橙色
+  ]
+  return colors[Math.floor(Math.random() * colors.length)];
+}

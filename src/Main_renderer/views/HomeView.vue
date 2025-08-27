@@ -42,8 +42,9 @@ function createNewNote() {
 }
 
 onMounted(() => {
-  tagStore.initTags();
-  noteStore.initNotes();
+  Promise.all([tagStore.loadTags(),noteStore.loadNotes()]).then(()=>{
+        router.push({name:'home'});
+  })
   noteStore.autoCleanTrash();
 
   window.electronAPI.createNote(() => createNewNote());

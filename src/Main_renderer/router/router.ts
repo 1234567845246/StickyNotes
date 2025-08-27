@@ -2,10 +2,15 @@ import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import NoteList from '../components/NoteList.vue';
 import TrashView from '../components/TrashView.vue';
 import NoteEditor from '../components/NoteEditor.vue';
+import Loading from '../components/Loading.vue';
 
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
+    component: Loading,
+  },
+  {
+    path: '/home',
     name: 'home',
     component: NoteList
   }, {

@@ -1,7 +1,7 @@
 <template>
   <div class="note-editor">
     <div class="editor-header">
-      <LimitInput v-model="editedNote.title" @input="updateContent('title', editedNote.title)" />
+      <LimitInput v-model="editedNote.title" @input="updateContent" />
       <button @click="closeEditor" class="button">❌</button>
     </div>
 
@@ -14,7 +14,7 @@
         </div>
       </div>
 
-      <button @click="showTagSelector = true"  class="add-tag-btn">
+      <button @click="showTagSelector = true" class="add-tag-btn">
         + {{ $t('addtag') }}
       </button>
     </div>
@@ -22,7 +22,7 @@
     <div class="content-editor">
       <MdEditor v-model="editedNote.content" ref="editorRef" :language="language" :theme="theme"
         :preview-theme="previewTheme" :toolbars="toolbars" style="height: calc(-50px + 100%);"
-        :onHtmlChanged="handleHtmlChange" @onDrop="handleDrag" @onUploadImg="handleUploadImg">
+        :onHtmlChanged="handleHtmlChange" @onDrop="handleDrag" @onUploadImg="handleUploadImg" @onInput="updateContent">
         <template #defToolbars>
           <Emoji>
             <template #trigger> Emoji </template>
@@ -61,6 +61,7 @@ import ImportTooBar from './ImportTooBar.vue';
 
 import { Emoji, PreviewThemeSwitch, ThemeSwitch } from '@vavt/v3-extension';
 import { MdEditor, config, PreviewThemes, Themes, ToolbarNames, ExposeParam } from 'md-editor-v3';
+import { getRandomColor } from '../../tools';
 
 const editorRef = useTemplateRef<ExposeParam>('editorRef');
 const route = useRoute();
@@ -211,55 +212,64 @@ const editedNote = ref<Note>(getInitialNote());
 
 function getInitialNote(): Note {
   if (route.name === 'create') {
-    return createDefaultNote();
+    // 创建新便签
+    let note = {
+      id: crypto.randomUUID(),
+      title: t('newNoteTitle'),
+      content: '',
+      color: getRandomColor(),
+      tags: [],
+      pinned: false,
+      deleted: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    useNoteStore().addNote(note);
+    return note;
   } else {
-    // 从store获取现有笔记
-    const note = noteStore.getNoteById(route.params.id as string);
-    return note ? { ...note } : createDefaultNote();
+    // 编辑现有便签
+    let note = noteStore.getNoteById(route.params.id as string);
+    if (note) {
+      return note
+    } else {
+      note = {
+        id: crypto.randomUUID(),
+        title: t('newNoteTitle'),
+        content: '',
+        color: getRandomColor(),
+        tags: [],
+        pinned: false,
+        deleted: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      useNoteStore().addNote(note);
+      return note;
+    }
   }
 }
 
 // 保存笔记并返回首页
-function saveNote() {
+async function saveNote() {
   if (editedNote.value.id) {
     noteStore.updateNote(editedNote.value.id, editedNote.value);
   } else {
-    noteStore.addNote(editedNote.value);
+    editedNote.value = await noteStore.addNote(editedNote.value) as Note;
   }
+
 }
 
 function closeEditor() {
   router.push({ name: 'home' });
 }
 
-function getRandomColor() {
-  const colors = ['#fff9c4', // 黄色
-    '#c8e6c9', // 绿色
-    '#bbdefb', // 蓝色
-    '#f8bbd0', // 粉色
-    '#e1bee7', // 紫色
-    '#ffccbc'  // 橙色
-  ]
-  return colors[Math.floor(Math.random() * colors.length)];
-}
 
-function createDefaultNote(): Note {
-  return {
-    id: Date.now().toString(),
-    title: t('newNoteTitle'),
-    content: '',
-    tags: [],
-    color: getRandomColor(),
-    pinned: false,
-    deleted: false,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }
-}
+
+
 
 //添加标签
 function addTag(tagId: string) {
-  useNoteStore().addTagToNote(editedNote.value.id,tagId)
+  useNoteStore().addTagToNote(editedNote.value.id, tagId)
 }
 
 function handleHtmlChange(h: string) {
@@ -268,11 +278,11 @@ function handleHtmlChange(h: string) {
 
 
 function removeTag(tagId: string) {
-  useNoteStore().removeTagFromNote(editedNote.value.id,tagId);
+  useNoteStore().removeTagFromNote(editedNote.value.id, tagId);
 }
 
-function updateContent(field: 'title' | 'content', value: any) {
-  editedNote.value[field] = value;
+function updateContent() {
+  // editedNote.value[field] = value;
   saveNote();
 }
 
@@ -310,18 +320,18 @@ function handleDrag(e: DragEvent) {
 }
 
 async function handleUploadImg(files: Array<File>, callback: (urls: string[] | { url: string; alt: string; title: string }[]) => void) {
-  const res =await Promise.all(
-    files.map(file=>{
-        return new Promise((resolve)=>{
-            let filepath = window.electronAPI.getPathForFile(file);
-            if(filepath !== ''){
-              resolve(`image://${filepath}`)
-            }else{
-              readFileAsBase64(file).then((base64:string)=>{
-                resolve(base64)
-              })
-            }
-        })
+  const res = await Promise.all(
+    files.map(file => {
+      return new Promise((resolve) => {
+        let filepath = window.electronAPI.getPathForFile(file);
+        if (filepath !== '') {
+          resolve(`image://${filepath}`)
+        } else {
+          readFileAsBase64(file).then((base64: string) => {
+            resolve(base64)
+          })
+        }
+      })
     })
   ) as string[];
   callback(res)
