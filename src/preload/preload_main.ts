@@ -22,6 +22,9 @@ export declare interface ElectronAPI {
     updateNote: (note: Partial<Note>) => Promise<boolean>;
     createNote: (callback: (...args: any[]) => void) => void;
 
+    addTagToNote: (noteId: string, tagId: string) => Promise<boolean>;
+    removeTagFromNote: (noteId: string, tagId: string) => Promise<boolean>;
+
     getTags: () => Promise<Tag[]>;
     saveTag: (tag: Tag) => Promise<boolean>;
     deleteTag: (id: string) => Promise<boolean>;
@@ -45,6 +48,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     deleteNote: (id: string) => ipcRenderer.invoke('delete-note', id),
     updateNote: (note: Partial<Note>) => ipcRenderer.invoke('update-note', note),
     createNote: (callback: (...args: any[]) => void) => ipcRenderer.on('create-note', callback),
+    addTagToNote: (noteId: string, tagId: string) => ipcRenderer.invoke('add-tag-to-note', noteId, tagId),
+    removeTagFromNote: (noteId: string, tagId: string) => ipcRenderer.invoke('remove-tag-from-note', noteId, tagId),
     getTags: () => ipcRenderer.invoke('get-tags'),
     saveTag: (tag: Tag) => ipcRenderer.invoke('save-tag', tag),
     deleteTag: (id: string) => ipcRenderer.invoke('delete-tag', id),

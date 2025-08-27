@@ -153,6 +153,13 @@ app.whenReady().then(() => {
     ipcMain.handle('update-note', async (_, note: Partial<Note>) => {
         return await database.updateNote(note);
     });
+    
+    ipcMain.handle('add-tag-to-note', async (_, noteId: string, tagId: string) => {
+        return await database.addTagToNote(noteId, tagId);
+    });
+    ipcMain.handle('remove-tag-from-note', async (_, noteId: string, tagId: string) => {
+        return await database.removeTagFromNote(noteId, tagId);
+    });
 
     ipcMain.handle('get-tags', () => {
         return database.getTags();

@@ -175,25 +175,13 @@ export const useNoteStore = defineStore('note', () => {
     async function togglePinNote(noteId: string) {
         const note = state.value.notes.find(n => n.id === noteId);
         if (note) {
-            const updatedNote = {
-                ...note,
-                pinned: !note.pinned,
-                updatedAt: new Date().toISOString()
-            };
-
-            // 更新数据库
-            const success = await window.electronAPI.updateNote(updatedNote);
-            if (success) {
-                note.pinned = !note.pinned;
-            } else {
-                console.error('Failed to toggle pin status in database');
-            }
+            updateNote(noteId, { pinned: !note.pinned });
         }
     }
 
 
 
-    function getNoteById(id: string) {
+    function getNoteById(id: string): Note | undefined {
         return state.value.notes.find(note => note.id === id);
     }
 
@@ -227,7 +215,7 @@ export const useNoteStore = defineStore('note', () => {
         }
     }
     // 更新便签
-    async function updateNote(noteId: string, update: Partial<Omit<Note, 'id'>>) {
+    async function updateNote(noteId: string, update: Partial<Omit<Note, 'id'>>): Promise<boolean> {
         const index = state.value.notes.findIndex(note => note.id === noteId);
         if (index !== -1) {
             const updatedNote = {
@@ -236,12 +224,16 @@ export const useNoteStore = defineStore('note', () => {
                 updatedAt: new Date().toISOString()
             };
 
+            updatedNote.tags = toRaw(updatedNote.tags);
+
             // 更新到数据库
             const success = await window.electronAPI.updateNote(updatedNote);
             if (success) {
                 state.value.notes[index] = updatedNote;
+                return true;
             }
         }
+        return false;
     }
 
     // 删除便签
@@ -253,11 +245,7 @@ export const useNoteStore = defineStore('note', () => {
         const note = state.value.notes.find(note => note.id === noteId);
         if (note && !note.tags.includes(tagId)) {
             // 更新数据库
-            const success = await window.electronAPI.updateNote({
-                ...note,
-                tags: [...note.tags, tagId],
-                updatedAt: new Date().toISOString()
-            });
+            const success = await window.electronAPI.addTagToNote(noteId, tagId);
 
             if (success) {
                 note.tags.push(tagId);
@@ -271,11 +259,7 @@ export const useNoteStore = defineStore('note', () => {
         const note = state.value.notes.find(note => note.id === noteId);
         if (note) {
             // 更新数据库
-            const success = await window.electronAPI.updateNote({
-                ...note,
-                tags: note.tags.filter(id => id !== tagId),
-                updatedAt: new Date().toISOString()
-            });
+            const success = await window.electronAPI.removeTagFromNote(noteId, tagId);
 
             if (success) {
                 note.tags = note.tags.filter(id => id !== tagId);
@@ -312,21 +296,8 @@ export const useNoteStore = defineStore('note', () => {
     async function moveToTrash(noteId: string) {
         const index = state.value.notes.findIndex(n => n.id === noteId);
         if (index !== -1) {
-            const updatedNote = {
-                ...state.value.notes[index],
-                deleted: true,
-                deletedAt: new Date().toISOString(),
-                originalPosition: index,
-                updatedAt: new Date().toISOString()
-            };
 
-            // 更新数据库
-            const success = await window.electronAPI.updateNote(updatedNote);
-            if (success) {
-                state.value.notes[index] = updatedNote;
-            } else {
-                console.error('Failed to move note to trash in database');
-            }
+            updateNote(noteId, { deleted: true, deletedAt: new Date().toISOString(), originalPosition: index });
         }
     }
 
@@ -343,7 +314,7 @@ export const useNoteStore = defineStore('note', () => {
             };
 
             // 更新数据库
-            const success = await window.electronAPI.updateNote(restoredNote);
+            const success = await updateNote(noteId, restoredNote);
             if (success) {
                 state.value.notes.splice(noteIndex, 1);
 

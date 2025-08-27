@@ -42,9 +42,9 @@ function createNewNote() {
 }
 
 onMounted(() => {
-  Promise.all([tagStore.loadTags(),noteStore.loadNotes()]).then(()=>{
-        router.push({name:'home'});
-  })
+  Promise.allSettled([tagStore.loadTags(), noteStore.loadNotes()]).then(() => {
+    router.push({ name: 'home' });
+  });
   noteStore.autoCleanTrash();
 
   window.electronAPI.createNote(() => createNewNote());

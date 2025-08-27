@@ -22,7 +22,7 @@
     <div class="content-editor">
       <MdEditor v-model="editedNote.content" ref="editorRef" :language="language" :theme="theme"
         :preview-theme="previewTheme" :toolbars="toolbars" style="height: calc(-50px + 100%);"
-        :onHtmlChanged="handleHtmlChange" @onDrop="handleDrag" @onUploadImg="handleUploadImg" @onInput="updateContent">
+        :onHtmlChanged="handleHtmlChange" @onDrop="handleDrag" @onUploadImg="handleUploadImg" @on-change="updateContent">
         <template #defToolbars>
           <Emoji>
             <template #trigger> Emoji </template>
