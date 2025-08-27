@@ -1,4 +1,4 @@
-# StickyNotes 便签/HexEditor 项目 / StickyNotes Note/HexEditor Project
+# StickyNotes 便签项目 / StickyNotes Note Project
 
 ## 中文版简介
 
