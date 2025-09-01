@@ -1,6 +1,6 @@
 # StickyNotes 📝
 
-[中文](README-CH) | English
+[中文](README-CH.md) | English
 
 ### 📖 Project Introduction
 

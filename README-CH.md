@@ -1,6 +1,6 @@
 # StickyNotes 📝
 
-中文 | [English](README)
+中文 | [English](README.md)
 
 ### 📖 项目简介
 
