@@ -1,12 +1,12 @@
 <template>
-  <div class="note-card" :style="{ backgroundColor: note.color }">
+  <div class="note-card" :style="{ backgroundColor: note.color }" @dblclick="handleEditorClick">
     <div>
       <div class="card-header">
         <h3 class="note-title">
           {{ note.title }}
         </h3>
         <button class="pin-btn" :class="{ pinned: note.pinned }" @click.stop="togglePin"
-          :title="note.pinned ?  t('pinned') :  t('unpin')">
+          :title="note.pinned ? t('pinned') : t('unpin')">
           {{ note.pinned ? '📌' : '📍' }}
         </button>
       </div>
@@ -42,7 +42,7 @@ import { useNoteStore, useTagStore } from '../store/store';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
-const {t}= useI18n();
+const { t } = useI18n();
 const router = useRouter();
 
 const props = defineProps<{ note: Note }>();
@@ -50,15 +50,15 @@ const tagStore = useTagStore();
 const noteStore = useNoteStore();
 
 
-function togglePin(){
+function togglePin() {
   noteStore.togglePinNote(props.note.id);
 }
 
-function handleEditorClick(){
-   router.push({ name: 'edit', params: { id: props.note.id } });
+function handleEditorClick() {
+  router.push({ name: 'edit', params: { id: props.note.id } });
 }
 
-function handleDeleteClick(){
+function handleDeleteClick() {
 
   noteStore.removeNote(props.note.id);
 }
@@ -100,6 +100,7 @@ const noteTags = computed(() => {
   transform: translateY(-5px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
+
 .note-card.pinned {
   border-left: 4px solid #ffb74d;
   background-color: rgba(255, 183, 77, 0.05);
@@ -128,6 +129,7 @@ const noteTags = computed(() => {
   font-size: 1.2rem;
   cursor: default;
 }
+
 .pin-btn.pinned {
   color: #ffb74d;
 }
@@ -140,10 +142,12 @@ const noteTags = computed(() => {
   flex: 1;
   font-size: 0.95rem;
   line-height: 1.5;
-  /* color: #333; */
   overflow: hidden;
   display: -webkit-box;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 5;
   line-clamp: 5;
+  -webkit-box-orient: vertical;
   box-orient: vertical;
 }
 

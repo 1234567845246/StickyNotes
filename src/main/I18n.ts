@@ -21,7 +21,7 @@ import { configManager } from "./Config";
     }
 
     private loadTranslations() {
-        const localePath = join(__dirname,'../public', 'locales', `${this.language}.json`);
+        const localePath = join(__dirname, 'locales', `${this.language}.json`);
         if(existsSync(localePath)){
             try{
                 this.translations = require(localePath);

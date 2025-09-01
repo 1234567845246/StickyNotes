@@ -93,7 +93,7 @@ function closConfigPanel() {
   tempConfig.value = {
     ...configStore.config
   };
-  emit('close');
+  model.value = false;
 }
 
 function resetConfig() {

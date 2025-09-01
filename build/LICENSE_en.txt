@@ -1,0 +1,11 @@
+﻿StickyNotes License Agreement
+
+
+
+Copyright © 2024 Your Company. All rights reserved.
+
+1. This software is for personal, educational, and non-commercial use only.
+2. Without permission, you may not copy, distribute, sell, or use this software for any commercial purpose.
+3. This software is provided "as is" without warranty of any kind, either express or implied.
+4. The developer is not liable for any direct or indirect damages arising from the use of this software.
+5. For commercial licensing or custom development, please contact the author.

@@ -20,34 +20,11 @@ protocol.registerSchemesAsPrivileged([{
         secure: true,
         supportFetchAPI: true
     }
-}, {
-    scheme: 'app', privileges: {
-        standard: true,
-        secure: true,
-        stream: true,
-        supportFetchAPI: true,
-        bypassCSP: true,
-        corsEnabled: true
-    }
 }])
 
 
 function RegisterProtocol() {
-    protocol.handle('app', (req) => {
-        let { pathname } = new URL(req.url);
-        let extension = extname(pathname).toLowerCase();
-        if (extension === '') {
-            pathname = 'index.html';
-            extension = '.html'
-        }
-        const tarFile = join(__dirname, pathname);
-        return new Response(readFileSync(tarFile), {
-            headers: {
-                'content-type': getMimeType(extension)
-            },
-            status: 200
-        })
-    })
+
 
     protocol.handle('image', async (req) => {
         let filePath: string = req.url.slice('image://'.length);
@@ -90,6 +67,19 @@ function RegisterProtocol() {
     })
 }
 
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+    app.quit();
+} else {
+    app.on('second-instance', () => {
+        if (mainWindow) {
+            if (mainWindow.isMinimizable()) {
+                mainWindow.restore();
+            }
+            mainWindow.focus();
+        }
+    })
+}
 
 app.whenReady().then(() => {
     let config = configManager.getConfig();
@@ -99,7 +89,7 @@ app.whenReady().then(() => {
         width: 1450,
         height: 800,
         title: i18n.t('title'),
-        icon: nativeImage.createFromPath(join(__dirname, '../public/notes.png')),
+        icon: nativeImage.createFromPath(join(__dirname, 'notes.png')),
         webPreferences: {
             preload: join(__dirname, 'preload_main.js'),
             nodeIntegration: true,
@@ -125,9 +115,10 @@ app.whenReady().then(() => {
     if (process.argv[2]) {
         mainWindow.loadURL(process.argv[2]);
     } else {
-        mainWindow.loadURL('app://index.html');
+        // mainWindow.loadURL('app://index.html');
+        mainWindow.loadFile(join(__dirname,'index.html'));
     }
-    mainWindow.webContents.openDevTools();
+       mainWindow.webContents.openDevTools({mode:'undocked'});
 
     ipcMain.handle('read-config', () => configManager.getConfig());
     ipcMain.handle('write-config', (_, config) => configManager.setConfig(config));
@@ -153,7 +144,7 @@ app.whenReady().then(() => {
     ipcMain.handle('update-note', async (_, note: Partial<Note>) => {
         return await database.updateNote(note);
     });
-    
+
     ipcMain.handle('add-tag-to-note', async (_, noteId: string, tagId: string) => {
         return await database.addTagToNote(noteId, tagId);
     });

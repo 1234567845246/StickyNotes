@@ -1,88 +1,59 @@
-
 <template>
-    <div class="loading">Load&nbsp;ng</div>
+  <div class="loading-container">
+    <div class="dot dot1"></div>
+    <div class="dot dot2"></div>
+    <div class="dot dot3"></div>
+  </div>
 </template>
-<style>
-.loading {
-  display: inline-block;
-  width: 100%;
+
+<style scoped>
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   height: 100%;
-  color: var( --baseColor-gray1);
-  position: relative;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 28px;
-  letter-spacing: 0.083333em;
+  width: 100%;
+  background: var(--content-background);
 }
-
-.loading::before {
-  content: "";
-  position: absolute;
-  right: 1.458333em;
-  bottom: 0.408333rem;
-  height: 0.583333em;
-  width: 0.104166em;
-  background: currentColor;
-  animation: loading-animation-l 1s linear infinite alternate;
-}
-
-.loading::after {
-  content: "";
-  width: 0.208333rem;
-  height: 0.208333rem;
-  position: absolute;
-  left: 2.604166em;
-  top: 0.041666em;
+.dot {
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  background: red;
-  animation: loading-animation 1s linear infinite alternate;
+  margin: 0 12px;
+  animation: rotate-dot 1.2s linear infinite;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.dot1 {
+  background: linear-gradient(135deg, #5e35b1, #3949ab);
+  animation-delay: 0s;
+}
+.dot2 {
+  background: linear-gradient(135deg, #f9aa33, #ff5d5d);
+  animation-delay: 0.2s;
+}
+.dot3 {
+  background: linear-gradient(135deg, #4fc3f7, #66bb6a);
+  animation-delay: 0.4s;
+}
+@keyframes rotate-dot {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.3) rotate(180deg);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1) rotate(360deg);
+    opacity: 1;
+  }
 }
 
-@keyframes loading-animation-l {
-  0% {
-    box-shadow: 0 -0.125em, -2.583333em -0.145833em;
-  }
-
-  25%,
-  75% {
-    box-shadow: 0 0px, -2.583333em -0.145833em;
-  }
-
-  100% {
-    box-shadow: 0 0px, -2.583333em -0.333333em;
-  }
+:root {
+  --content-background: var(--baseColor-gray0, #fff);
 }
-
-@keyframes loading-animation {
-  0% {
-    transform: translate(0px, 0px) scaleX(1);
-  }
-
-  14% {
-    transform: translate(-0.25em, -0.333333em) scaleX(1.05);
-  }
-
-  28% {
-    transform: translate(-0.5625em, -0.583333em) scaleX(1.07);
-  }
-
-  42% {
-    transform: translate(-0.958333em, -0.729166em) scaleX(1.1);
-  }
-
-  57% {
-    transform: translate(-1.458333em, -0.770833em) scaleX(1.1);
-  }
-
-  71% {
-    transform: translate(-1.958333em, -0.666666em) scaleX(1.07);
-  }
-
-  85% {
-    transform: translate(-2.3125em, -0.458333em) scaleX(1.05);
-  }
-
-  100% {
-    transform: translate(-2.604166em, -0.1875em) scaleX(1);
-  }
+[data-theme="dark"] .loading-container {
+  background: var(--content-background, #1a1a1a);
 }
 </style>

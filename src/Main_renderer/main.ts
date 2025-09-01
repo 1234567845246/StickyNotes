@@ -1,5 +1,4 @@
 import { createApp } from 'vue'
-import '@wsfe/vue-tree/dist/style.css'
 import './style.css'
 import 'md-editor-v3/lib/style.css';
 import 'katex/dist/katex.min.css'
