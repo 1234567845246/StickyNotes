@@ -1,5 +1,6 @@
 <template>
-  <div class="note-card" :style="{ backgroundColor: note.color }" @dblclick="handleEditorClick">
+  <div class="note-card" :style="{ backgroundColor: note.color }" @dblclick="handleEditorClick"
+    @contextmenu="handleContextmenu">
     <div>
       <div class="card-header">
         <h3 class="note-title">
@@ -41,6 +42,7 @@ import { Note } from '../../type';
 import { useNoteStore, useTagStore } from '../store/store';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import ContextMenu from '@imengyu/vue3-context-menu'
 
 const { t } = useI18n();
 const router = useRouter();
@@ -61,6 +63,25 @@ function handleEditorClick() {
 function handleDeleteClick() {
 
   noteStore.removeNote(props.note.id);
+}
+
+function handleContextmenu(event: MouseEvent) {
+  event.preventDefault();
+  ContextMenu.showContextMenu({
+    x: event.clientX, y: event.clientY,
+    theme: document.body.getAttribute('data-theme') === 'light' ? 'default' : 'default dark',
+    items: [
+      { label: props.note.pinned ? t('unpin') : t('pinned'), onClick: togglePin },
+      { label: t('edit'), onClick: handleEditorClick },
+      { label: t('delete'), onClick: handleDeleteClick, divided: true },
+      {
+        label: t('copy'), onClick: () => {
+          window.navigator.clipboard.writeText(props.note.content)
+        }
+      },
+
+    ]
+  })
 }
 
 const formattedDate = computed(() => {
@@ -146,6 +167,7 @@ const noteTags = computed(() => {
   display: -webkit-box;
   text-overflow: ellipsis;
   -webkit-line-clamp: 5;
+  height: 50%;
   line-clamp: 5;
   -webkit-box-orient: vertical;
   box-orient: vertical;

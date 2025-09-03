@@ -204,7 +204,6 @@ export const useNoteStore = defineStore('note', () => {
         };
 
         // 保存到数据库
-        console.log(newNote);
         const success = await window.electronAPI.saveNote(newNote);
         if (success) {
             state.value.notes.push(newNote);

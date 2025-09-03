@@ -6,6 +6,7 @@ import 'cropperjs/dist/cropper.min.css'
 import "@vavt/v3-extension/lib/asset/Emoji.css"
 import "@vavt/v3-extension/lib/asset/PreviewThemeSwitch.css"
 import "@vavt/v3-extension/lib/asset/ThemeSwitch.css"
+import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css'
 import App from './App.vue'
 import { createI18n } from 'vue-i18n'
 import { messages } from './i18n'

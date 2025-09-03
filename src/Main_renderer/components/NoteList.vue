@@ -11,6 +11,7 @@
         <input v-model="search" :placeholder="t('search')" class="input search-input" @input="handleSearchInput" />
         <span class="search-icon">🔍</span>
       </div>
+      <SortSelector v-model="sortType" />
     </div>
     <!-- 添加置顶分组 -->
     <div v-if="pinnedNotes.length > 0" class="notes-section">
@@ -42,6 +43,8 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useNoteStore, useTagStore } from '../store/store';
 import NoteCard from './NoteCard.vue';
+import SortSelector, { type SortType } from './SortSelector.vue';
+import { Note } from '../../type';
 
 const { t } = useI18n();
 
@@ -49,12 +52,37 @@ const noteStore = useNoteStore();
 const tagStore = useTagStore();
 
 const search = ref<string>('');
+const sortType = ref<SortType>('updated-desc');
+
 function handleSearchInput() {
   noteStore.setSearchQuery(search.value)
 }
 
+// 排序函数
+function sortNotes(notes: Note[], sortType: SortType): Note[] {
+  const sortedNotes = [...notes];
+  
+  switch (sortType) {
+    case 'updated-desc':
+      return sortedNotes.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+    case 'updated-asc':
+      return sortedNotes.sort((a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime());
+    case 'created-desc':
+      return sortedNotes.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    case 'created-asc':
+      return sortedNotes.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    case 'title-asc':
+      return sortedNotes.sort((a, b) => a.title.localeCompare(b.title));
+    case 'title-desc':
+      return sortedNotes.sort((a, b) => b.title.localeCompare(a.title));
+    default:
+      return sortedNotes;
+  }
+}
+
 const filteredNotes = computed(() => {
-  return noteStore.filteredNotes();
+  const filtered = noteStore.filteredNotes();
+  return sortNotes(filtered, sortType.value);
 });
 
 const pinnedNotes = computed(() => {
@@ -132,6 +160,9 @@ h2 {
 }
 
 .search-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   position: relative;
   width: 250px;
 }

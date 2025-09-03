@@ -8,8 +8,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@imengyu/vue3-context-menu": "^1.5.2",
     "@types/better-sqlite3": "^7.6.13",
     "@types/fs-extra": "^11.0.4",
+    "@types/html2pdf.js": "^0.10.0",
     "@types/katex": "^0.16.7",
     "@types/wicg-file-system-access": "^2023.10.6",
     "@vavt/v3-extension": "^3.0.0",
@@ -17,6 +19,7 @@
     "cropperjs": "1.6.2",
     "fs-extra": "^11.3.1",
     "highlight.js": "^11.11.1",
+    "html2pdf.js": "^0.12.0",
     "katex": "^0.16.22",
     "md-editor-v3": "^5.8.4",
     "mermaid": "^11.9.0",
