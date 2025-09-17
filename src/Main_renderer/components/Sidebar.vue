@@ -26,7 +26,7 @@
         </ul>
       </div>
 
-      <div class="sidebar-section">
+      <div class="sidebar-section" style="height: 70%; overflow-y: auto;">
         <h3>{{ $t('tagclass') }}</h3>
         <ul class="sidebar-menu">
           <li @click="showAllNote(null)">

@@ -9,9 +9,12 @@ import { i18n } from "./I18n";
 import { existsSync, readFileSync } from "fs";
 import { platform } from "os";
 import { insertChar } from "../tools";
+import { CryptoTools, EncryptionAlgorithm } from "./crypto";
 
 let mainWindow: BrowserWindow;
 let menuManguage: MenuManager;
+
+
 
 
 protocol.registerSchemesAsPrivileged([{
@@ -84,10 +87,10 @@ if (!gotTheLock) {
 app.whenReady().then(() => {
     let config = configManager.getConfig();
     mainWindow = new BrowserWindow({
-        minHeight: 800,
+        minHeight: 1000,
         minWidth: 1250,
         width: 1450,
-        height: 800,
+        height: 1200,
         title: i18n.t('title'),
         icon: nativeImage.createFromPath(join(__dirname, 'notes.png')),
         webPreferences: {
@@ -113,12 +116,11 @@ app.whenReady().then(() => {
     menuManguage = new MenuManager(mainWindow);
     nativeTheme.themeSource = config.theme;
     if (process.argv[2]) {
+        mainWindow.webContents.openDevTools({ mode: 'undocked' });
         mainWindow.loadURL(process.argv[2]);
     } else {
-        // mainWindow.loadURL('app://index.html');
-        mainWindow.loadFile(join(__dirname,'index.html'));
+        mainWindow.loadFile(join(__dirname, 'index.html'));
     }
-       mainWindow.webContents.openDevTools({mode:'undocked'});
 
     ipcMain.handle('read-config', () => configManager.getConfig());
     ipcMain.handle('write-config', (_, config) => configManager.setConfig(config));
@@ -186,6 +188,23 @@ app.whenReady().then(() => {
             app.quit();
         }
     })
+
+    // 加密相关的IPC处理程序
+    ipcMain.handle('encrypt-text', async (_, text: string, password: string, algorithm: EncryptionAlgorithm) => {
+        try {
+            return CryptoTools.encrypt(text, password, algorithm);
+        } catch (error) {
+            throw new Error('加密失败：' + (error as Error).message);
+        }
+    });
+
+    ipcMain.handle('decrypt-text', async (_, encryptedData: string, password: string, salt: string, iv: string, algorithm: EncryptionAlgorithm) => {
+        try {
+            return CryptoTools.decrypt(encryptedData, password, salt, iv, algorithm);
+        } catch (error) {
+            console.error('解密失败：', (error as Error).message);
+        }
+    });
 });
 
 app.on('window-all-closed', () => {

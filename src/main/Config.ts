@@ -18,6 +18,9 @@ class ConfigManager {
       if (existsSync(this.configPath)) {
         const raw = readFileSync(this.configPath, 'utf-8')
         return { ...defaultconfig, ...JSON.parse(raw) }
+      }else{
+        writeFileSync(this.configPath, JSON.stringify(defaultconfig, null, 2), 'utf-8');
+        return { ...defaultconfig }
       }
     } catch (e) {
       console.error('读取配置失败:', e)

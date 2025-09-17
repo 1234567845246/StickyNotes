@@ -86,6 +86,21 @@ export class MenuManager {
                 }
             ]
         }, {
+            label: i18n.t('menu.view'),
+            submenu: [
+                { label: i18n.t('menu.view.reload'), role: 'reload' },
+                { label: i18n.t('menu.view.forceReload'), role: 'forceReload' },
+                { type: 'separator' },
+
+                { label: i18n.t('menu.view.minimize'), role: 'minimize' },  
+                { type: 'separator' },
+                { label: i18n.t('menu.view.resetZoom'), role: 'resetZoom' },
+                { label: i18n.t('menu.view.zoomIn'), role: 'zoomIn' },
+                { label: i18n.t('menu.view.zoomOut'), role: 'zoomOut' },
+                { type: 'separator' },
+                { label: i18n.t('menu.view.toggleFullscreen'), role: 'togglefullscreen' }
+            ]
+        },{
             label: i18n.t('menu.help'),
             submenu: [{
                 label: i18n.t('menu.help.config'),

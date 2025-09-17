@@ -30,10 +30,10 @@ function devPlugin() {
       const sourceDir = join(__dirname, 'public');
       const targetDir = join(__dirname, 'dist');
 
-      copy(sourceDir, targetDir,{
-        overwrite:true,
-        errorOnExist:false,
-        preserveTimestamps:true
+      copy(sourceDir, targetDir, {
+        overwrite: true,
+        errorOnExist: false,
+        preserveTimestamps: true
       })
 
       server.httpServer?.once("listening", () => {
@@ -60,7 +60,7 @@ function buildMain() {
     platform: "node",
     minify: true,
     outfile: "./dist/mainEntry.js",
-    external: ["electron","better-sqlite3"],
+    external: ["electron", "better-sqlite3"],
   });
   buildSync({
     entryPoints: ["./src/preload/preload_main.ts"],
@@ -97,11 +97,6 @@ function buildInstaller() {
         app: join(process.cwd(), "dist")
       },
       npmRebuild: false,
-      files: [
-        // "dist/",
-        // "node_modules/",
-        // "package.json"
-      ],
       extends: null,
       asar: true,
       win: {
@@ -128,8 +123,8 @@ function buildInstaller() {
         uninstallDisplayName: "${productName}-Uninstaller",
         artifactName: "${productName}-${version}-setup.${ext}",
         runAfterFinish: true,
-        multiLanguageInstaller:true,
-        displayLanguageSelector:true,
+        multiLanguageInstaller: true,
+        displayLanguageSelector: true,
         installerLanguages: ["zh-CN", "en-US"],
       }
     },
@@ -157,7 +152,7 @@ export default defineConfig({
       }],
     }
   },
-  base:'./',
+  base: './',
   json: {
     stringify: true,
   }

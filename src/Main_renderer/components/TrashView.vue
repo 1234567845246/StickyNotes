@@ -96,11 +96,9 @@ function remainingDays(date: Date) {
     return retentionDays;
   }
   const now = new Date();
-  date.setHours(0, 0, 0, 0);
-  now.setHours(0, 0, 0, 0);
-
-  const diffMs = now.valueOf() - date.valueOf();
-  return Math.max(0, 30 - Math.round(diffMs / (1000 / 60 * 60 * 24)));
+  
+  const diffMs = now.getTime() - date.getTime();
+  return Math.max(0,30 -  Math.round(diffMs / (1000 * 60 * 60 * 24)));
 }
 
 

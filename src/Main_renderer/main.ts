@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import './style.css'
+import './assets/style.css'
 import 'md-editor-v3/lib/style.css';
 import 'katex/dist/katex.min.css'
 import 'cropperjs/dist/cropper.min.css'
@@ -9,7 +9,7 @@ import "@vavt/v3-extension/lib/asset/ThemeSwitch.css"
 import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css'
 import App from './App.vue'
 import { createI18n } from 'vue-i18n'
-import { messages } from './i18n'
+import { messages } from './i18n/i18n'
 import { createPinia } from 'pinia'
 import { setTheme } from './theme/theme'
 import  router  from './router/router'

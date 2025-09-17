@@ -14,7 +14,13 @@ function parseArgv(key: string) {
 
 
 export declare interface ElectronAPI {
-
+    // 加密相关API
+    encryptText: (text: string, password: string, algorithm: string) => Promise<{
+        encryptedData: string;
+        salt: string;
+        iv: string;
+    }>;
+    decryptText: (encryptedData: string, password: string, salt: string, iv: string, algorithm: string) => Promise<string>;
 
     getNotes: () => Promise<Note[]>;
     saveNote: (note: Note) => Promise<boolean>;
@@ -42,6 +48,11 @@ export declare interface ElectronAPI {
 }
 
 contextBridge.exposeInMainWorld('electronAPI', {
+    // 加密相关API
+    encryptText: (text: string, password: string, algorithm: string) => 
+        ipcRenderer.invoke('encrypt-text', text, password, algorithm),
+    decryptText: (encryptedData: string, password: string, salt: string, iv: string, algorithm: string) => 
+        ipcRenderer.invoke('decrypt-text', encryptedData, password, salt, iv, algorithm),
 
     getNotes: () => ipcRenderer.invoke('get-notes'),
     saveNote: (note: Note) => ipcRenderer.invoke('save-note', note),

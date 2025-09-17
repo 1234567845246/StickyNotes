@@ -22,7 +22,8 @@
     <div class="content-editor">
       <MdEditor v-model="editedNote.content" ref="editorRef" :language="language" :theme="theme"
         :preview-theme="previewTheme" :toolbars="toolbars" style="height: calc(-50px + 100%);"
-        :onHtmlChanged="handleHtmlChange" @onDrop="handleDrag" @onUploadImg="handleUploadImg" @on-change="updateContent">
+        :onHtmlChanged="handleHtmlChange" @onDrop="handleDrag" @onUploadImg="handleUploadImg"
+        @on-change="updateContent">
         <template #defToolbars>
           <Emoji>
             <template #trigger> Emoji </template>
@@ -62,6 +63,7 @@ import ImportTooBar from './ImportTooBar.vue';
 import { Emoji, PreviewThemeSwitch, ThemeSwitch } from '@vavt/v3-extension';
 import { MdEditor, config, PreviewThemes, Themes, ToolbarNames, ExposeParam } from 'md-editor-v3';
 import { getRandomColor } from '../../tools';
+import { themeManager } from '../theme/theme';
 
 const editorRef = useTemplateRef<ExposeParam>('editorRef');
 const route = useRoute();
@@ -189,20 +191,11 @@ config({
   }
 })
 
-const observer = new MutationObserver((mutations: MutationRecord[]) => {
-  mutations.forEach(mutation => {
-    if (mutation.type === 'attributes') {
-      let t = document.body.getAttribute('data-theme') as Themes
-      theme.value = t;
 
-    }
-  })
+themeManager.onThemeChange((newTheme) => {
+  theme.value = newTheme;
 })
 
-observer.observe(document.body, {
-  attributes: true,
-  attributeFilter: ['data-theme']
-})
 
 
 const tagStore = useTagStore();

@@ -5,6 +5,17 @@ export const defaultconfig: Config = {
   autoClean: true,
 }
 
+
+export enum EncryptionAlgorithm {
+    AES_256_GCM = 'aes-256-gcm',
+    AES_256_CBC = 'aes-256-cbc',
+    AES_256_CTR = 'aes-256-ctr',
+    AES_256_CFB = 'aes-256-cfb',
+    AES_256_OFB = 'aes-256-ofb'
+}
+
+
+
 export type Theme = 'system' | 'light' | 'dark'
 export type Language = 'zh' | 'en'
 
@@ -29,6 +40,36 @@ export interface Tag {
   updatedAt: string; // 时间戳
 }
 
+export const NOTE_COLORS = {
+  yellow: {
+    light: '#fff9c4',
+    dark: '#f9a825'
+  },
+  green: {
+    light: '#c8e6c9',
+    dark: '#2e7d32'
+  },
+  blue: {
+    light: '#bbdefb',
+    dark: '#1565c0'
+  },
+  pink: {
+    light: '#f8bbd0',
+    dark: '#c2185b'
+  },
+  purple: {
+    light: '#e1bee7',
+    dark: '#7b1fa2'
+  },
+  orange: {
+    light: '#ffccbc',
+    dark: '#e64a19'
+  }
+} as const;
+
+
+export type NoteColorType = keyof typeof NOTE_COLORS;
+
 
 export interface Note {
   id: string;
@@ -36,9 +77,16 @@ export interface Note {
   tags: string[];
   pinned: boolean;
   content: string;
-  color: string;
+  color: NoteColorType;
   createdAt: string; // 时间戳
   updatedAt: string; // 时间戳
+
+  // 加密相关字段
+  isEncrypted?: boolean;
+  encryptedContent?: string;
+  salt?: string;
+  iv?: string;
+  algorithm?: EncryptionAlgorithm;
 
   // 回收站相关的新增字段
   deleted: boolean;        // 标记是否已被删除（在回收站中）
@@ -61,4 +109,24 @@ export interface TagState {
 export interface NoteState {
   notes: Note[];
   searchQuery: string; // 搜索查询
+}
+
+
+export type ViewType = 'grid' | 'kanban' | 'calendar' | 'timeline' | 'list';
+
+export interface ViewOption {
+  type: ViewType;
+  label: string;
+  icon: string;
+  description: string;
+  available: boolean;
+}
+
+export interface KanbanColumn {
+  id: string;
+  title: string;
+  tagId?: string;
+  color: string;
+  order: number;
+  width: number;
 }

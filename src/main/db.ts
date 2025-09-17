@@ -20,7 +20,7 @@ class Database {
 
 
         if (!dbExists) {
-            // 创建notes表（增加新字段）
+            // 创建notes表（增加新字段，包含加密相关字段）
             this.db.exec(`CREATE TABLE IF NOT EXISTS notes (
                 id TEXT PRIMARY KEY,
                 title TEXT NOT NULL,
@@ -31,7 +31,12 @@ class Database {
                 deleted INTEGER DEFAULT 0,
                 pinned INTEGER DEFAULT 0,
                 deletedAt TEXT,
-                originalPosition INTEGER
+                originalPosition INTEGER,
+                isEncrypted INTEGER DEFAULT 0,
+                encryptedContent TEXT,
+                salt TEXT,
+                iv TEXT,
+                algorithm TEXT
             )`);
 
             // 创建tags表
@@ -51,10 +56,37 @@ class Database {
                 FOREIGN KEY (note_id) REFERENCES notes (id) ON DELETE CASCADE,
                 FOREIGN KEY (tag_id) REFERENCES tags (id) ON DELETE CASCADE
             )`);
+        } else {
+            // 如果数据库已存在，检查并添加新的加密字段
+            this.addEncryptionFieldsIfNotExists();
         }
 
 
 
+    }
+    
+    // 检查并添加加密字段（如果不存在）
+    private addEncryptionFieldsIfNotExists() {
+        try {
+            // 检查是否已经有isEncrypted字段
+            const tableInfo = this.db.prepare("PRAGMA table_info(notes)").all() as { name: string }[];
+            const hasEncryptionFields = tableInfo.some(column => column.name === 'isEncrypted');
+            
+            if (!hasEncryptionFields) {
+                console.log('正在添加加密相关字段...');
+                
+                // 添加加密相关字段
+                this.db.exec(`ALTER TABLE notes ADD COLUMN isEncrypted INTEGER DEFAULT 0`);
+                this.db.exec(`ALTER TABLE notes ADD COLUMN encryptedContent TEXT`);
+                this.db.exec(`ALTER TABLE notes ADD COLUMN salt TEXT`);
+                this.db.exec(`ALTER TABLE notes ADD COLUMN iv TEXT`);
+                this.db.exec(`ALTER TABLE notes ADD COLUMN algorithm TEXT`);
+                
+                console.log('加密相关字段添加完成');
+            }
+        } catch (error) {
+            console.error('添加加密字段失败:', error);
+        }
     }
     public static getDatabaseInstance(): Database {
         if (!Database.instance) {
@@ -144,27 +176,33 @@ class Database {
         });
     }
 
-    // 修改获取便签的方法，包含标签信息
+    // 修改获取便签的方法，包含标签信息和加密信息
     public getNotes(): Note[] {
         const stmt = this.db.prepare('SELECT * FROM notes');
         const notes = stmt.all() as Note[];
 
-        // 为每个便签获取标签
+        // 为每个便签获取标签并处理加密字段
         return notes.map(note => ({
             ...note,
             tags: this.getNoteTags(note.id),
             deleted: Boolean(note.deleted),
-            pinned: Boolean(note.pinned)
+            pinned: Boolean(note.pinned),
+            isEncrypted: Boolean(note.isEncrypted),
+            // 确保加密相关字段存在
+            encryptedContent: note.encryptedContent || undefined,
+            salt: note.salt || undefined,
+            iv: note.iv || undefined,
+            algorithm: note.algorithm || undefined
         }));
     }
 
-    // 修改保存便签的方法，同时保存标签关系
+    // 修改保存便签的方法，同时保存标签关系和加密信息
     public saveNote(note: Note): Promise<boolean> {
         return new Promise(async (resolve) => {
             try {
-                // 保存便签基本信息
+                // 保存便签基本信息（包括加密相关字段）
                 const stmt = this.db.prepare(
-                    'INSERT OR REPLACE INTO notes (id, title, content, color, createdAt, updatedAt, deleted, pinned, deletedAt, originalPosition) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+                    'INSERT OR REPLACE INTO notes (id, title, content, color, createdAt, updatedAt, deleted, pinned, deletedAt, originalPosition, isEncrypted, encryptedContent, salt, iv, algorithm) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
                 );
                 stmt.run(
                     note.id,
@@ -176,7 +214,12 @@ class Database {
                     note.deleted ? 1 : 0,
                     note.pinned ? 1 : 0,
                     note.deletedAt,
-                    note.originalPosition
+                    note.originalPosition,
+                    note.isEncrypted ? 1 : 0,
+                    note.encryptedContent,
+                    note.salt,
+                    note.iv,
+                    note.algorithm
                 );
 
                 // 先移除所有现有标签关联
@@ -202,8 +245,9 @@ class Database {
         return new Promise((resolve) => {
             try {
                 const stmt = this.db.prepare(
-                    'UPDATE notes SET title = ?, content = ?, color = ?, updatedAt = ?, deleted = ?, pinned = ?, deletedAt = ?, originalPosition = ? WHERE id = ?'
+                    'UPDATE notes SET title = ?, content = ?, color = ?, updatedAt = ?, deleted = ?, pinned = ?, deletedAt = ?, originalPosition = ?, isEncrypted = ?, encryptedContent = ?, salt = ?, iv = ?, algorithm = ? WHERE id = ?'
                 );
+                console.log('Updating note with data:', note);
                 stmt.run(
                     note.title,
                     note.content,
@@ -213,6 +257,11 @@ class Database {
                     note.pinned ? 1 : 0,
                     note.deletedAt,
                     note.originalPosition,
+                    note.isEncrypted ? 1 : 0,
+                    note.encryptedContent,
+                    note.salt,
+                    note.iv,
+                    note.algorithm,
                     note.id
                 );
                 resolve(true);
