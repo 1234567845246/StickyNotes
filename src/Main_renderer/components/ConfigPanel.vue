@@ -27,6 +27,17 @@
               </select>
             </p>
             <label>
+                {{ $t('config.contextmenu') }} 
+            </label>
+            <p>
+              <select class="select" v-model="tempConfig.contextmenutheme" autocomplete="off">
+                <option value="default">{{ $t('config.default') }}</option>
+                <option value="flat">{{ $t('config.flat') }}</option>
+                <option value="win10">{{ $t('config.win10') }}</option>
+                <option value="mac">{{ $t('config.mac') }}</option>
+              </select>
+            </p>
+            <label>
               {{ $t('config.trashconfig') }}
             </label>
             <CustomCheckbox v-model="tempConfig.autoClean">

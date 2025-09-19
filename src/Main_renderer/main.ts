@@ -17,7 +17,6 @@ import  router  from './router/router'
 let config = window.electronAPI.configurate();
 setTheme(config.theme);
 const locale = config.language;
-console.log(locale);
 const i18n = createI18n({
     legacy: false,
     locale,

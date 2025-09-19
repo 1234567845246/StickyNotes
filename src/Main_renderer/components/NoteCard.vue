@@ -5,7 +5,8 @@
       <div class="card-header">
         <h3 class="note-title" v-if="!editTitle">
           {{ note.title }}
-          <span v-if="note.isEncrypted" class="encrypted-icon" title="已加密">🔒</span>
+          <span v-if="note.isEncrypted" class="encrypted-icon" :title="t('encryption.encrypted')">🔒</span>
+          <span v-if="note.star" class="encrypted-icon" :title="t('stared')">⭐</span>
         </h3>
         <input v-else type="text" v-model="renameTitle" @blur="handleRenameTitle" @keyup.enter="handleRenameTitle"
           :ref="'note' + props.note.id" />
@@ -42,7 +43,7 @@
 
 import { computed, ref, useTemplateRef, nextTick } from 'vue';
 import { Note } from '../../type';
-import { useNoteStore, useTagStore } from '../store/store';
+import { useNoteStore, useTagStore, useConfigStore } from '../store/store';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import ContextMenu from '@imengyu/vue3-context-menu'
@@ -100,7 +101,7 @@ const handleEncryptionConfirm = async (password: string, algorithm?: EncryptionA
           salt: undefined,
           iv: undefined,
           algorithm: undefined
-        });
+        }, false);
 
       // 解密成功后打开编辑器
       handleEditorClick();
@@ -127,7 +128,7 @@ const handleEncryptionConfirm = async (password: string, algorithm?: EncryptionA
       salt,
       iv,
       algorithm
-    });
+    }, false);
   }
 
   showEncryptionDialog.value = false;
@@ -140,6 +141,9 @@ const titleInputRef = useTemplateRef<HTMLInputElement>('note' + props.note.id);
 
 function togglePin() {
   noteStore.togglePinNote(props.note.id);
+}
+function toggleStar() {
+  noteStore.toggleStarNote(props.note.id);
 }
 
 function handleEditorClick() {
@@ -164,9 +168,10 @@ function handleContextmenu(event: MouseEvent) {
   event.preventDefault();
   ContextMenu.showContextMenu({
     x: event.clientX, y: event.clientY,
-    theme: document.body.getAttribute('data-theme') === 'light' ? 'default' : 'default dark',
+    theme: document.body.getAttribute('data-theme') === 'light' ? `${useConfigStore().config.contextmenutheme}` : `${useConfigStore().config.contextmenutheme} dark`,
     items: [
       { label: props.note.pinned ? t('unpin') : t('pinned'), onClick: togglePin },
+      { label: props.note.star ? t('unstar') : t('star'), onClick: toggleStar },
       {
         label: t('edit'),
         onClick: () => {

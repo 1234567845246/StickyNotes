@@ -38,8 +38,8 @@ import { Tag } from '../../type';
 import { useI18n } from 'vue-i18n';
 
 
-const model = defineModel({type:Boolean,required:true})
-const {t} = useI18n();
+const model = defineModel({ type: Boolean, required: true })
+const { t } = useI18n();
 
 const tagStore = useTagStore();
 const newTagName = ref('');
@@ -60,7 +60,9 @@ function addNewTag() {
 }
 
 function removeTag(tagId: string) {
-    tagStore.removeTag(tagId);
+    if (confirm(t('deleteConfirm'))) {
+        tagStore.removeTag(tagId);
+    }
 }
 
 //开始编辑标签
@@ -101,7 +103,6 @@ const tagUsageCount = computed(() => {
 </script>
 
 <style lang="css" scoped>
-
 .add-tag-form {
     display: flex;
     gap: 10px;
@@ -125,7 +126,7 @@ const tagUsageCount = computed(() => {
 
 
 .add-btn {
-    background-color: var( --trash-restore-btn-background);
+    background-color: var(--trash-restore-btn-background);
     color: var(--trash-restore-btn-foreground);
 }
 
@@ -190,7 +191,7 @@ const tagUsageCount = computed(() => {
     color: var(--save-btn-foreground);
 }
 
-.save-btn:hover{
+.save-btn:hover {
     background-color: var(--save-btn-hove);
 }
 
@@ -198,8 +199,9 @@ const tagUsageCount = computed(() => {
     background-color: var(--baseColor-gray1);
     color: var(--button-color);
 }
+
 .cancel-btn:hover {
-  background-color: var(--button-hover-background);
+    background-color: var(--button-hover-background);
 }
 
 .empty-tags {

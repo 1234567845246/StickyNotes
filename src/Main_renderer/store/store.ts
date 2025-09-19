@@ -70,6 +70,7 @@ export const useTagStore = defineStore('tag', () => {
         const success = await window.electronAPI.deleteTag(tagId);
         if (success) {
             state.value.tags = state.value.tags.filter(tag => tag.id !== tagId);
+            useNoteStore().removeTagFromAllNote(tagId)
         }
     }
     // 更新标签
@@ -134,7 +135,8 @@ export const useTagStore = defineStore('tag', () => {
 export const useNoteStore = defineStore('note', () => {
     const state = ref<NoteState>({
         notes: [],
-        searchQuery: '' // 搜索查询
+        searchQuery: '', // 搜索查询
+        filterType: 'title' // 过滤类型：title | 'pinned' | 'star'
     });
 
     const activeNotes = computed(() => {
@@ -171,15 +173,29 @@ export const useNoteStore = defineStore('note', () => {
     function setSearchQuery(query: string) {
         state.value.searchQuery = query;
     }
-    //切换初始状态
+    
+    // 设置过滤类型
+    function setFilterType(type: 'pinned' | 'star' | 'title') {
+        state.value.filterType = type;
+    }
+    
+    // 获取过滤类型
+    const filterType = computed(() => state.value.filterType);
+    //切换置顶状态
     async function togglePinNote(noteId: string) {
         const note = state.value.notes.find(n => n.id === noteId);
         if (note) {
-            updateNote(noteId, { pinned: !note.pinned });
+            updateNote(noteId, { pinned: !note.pinned },false);
         }
     }
 
-
+    //切换收藏状态
+    async function toggleStarNote(noteId:string) {
+        const note = state.value.notes.find(n=>n.id === noteId);
+        if(note){
+            updateNote(noteId,{star:!note.star},false)
+        }
+    }
 
     function getNoteById(id: string): Note | undefined {
         return state.value.notes.find(note => note.id === id);
@@ -193,34 +209,27 @@ export const useNoteStore = defineStore('note', () => {
 
 
     // 添加便签
-    async function addNote(note: Omit<Note, 'id' | 'createdAt' | 'updatedAt' | 'deleted' | 'pinned'>): Promise<Note | null> {
-        const newNote: Note = {
-            ...note,
-            id: crypto.randomUUID(),
-            deleted: false,
-            pinned: false,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        };
+    async function addNote(note: Note) {
+
 
         // 保存到数据库
-        const success = await window.electronAPI.saveNote(newNote);
+        const success = await window.electronAPI.saveNote(note);
         if (success) {
-            state.value.notes.push(newNote);
-            return newNote; // 返回新创建的便签
+            state.value.notes.push(note);
+            return note; // 返回新创建的便签
         } else {
             console.error('Failed to save note to database');
             return null;
         }
     }
     // 更新便签
-    async function updateNote(noteId: string, update: Partial<Omit<Note, 'id'>>): Promise<boolean> {
+    async function updateNote(noteId: string, update: Partial<Omit<Note, 'id'>>,isupdatetime:boolean=true): Promise<boolean> {
         const index = state.value.notes.findIndex(note => note.id === noteId);
         if (index !== -1) {
             const updatedNote = {
                 ...state.value.notes[index],
                 ...update,
-                updatedAt: new Date().toISOString()
+                updatedAt: isupdatetime?new Date().toISOString():state.value.notes[index].updatedAt
             };
 
             updatedNote.tags = toRaw(updatedNote.tags);
@@ -242,6 +251,7 @@ export const useNoteStore = defineStore('note', () => {
     // 添加标签到便签
     async function addTagToNote(noteId: string, tagId: string) {
         const note = state.value.notes.find(note => note.id === noteId);
+        console.log(note, !note?.tags.includes(tagId));
         if (note && !note.tags.includes(tagId)) {
             // 更新数据库
             const success = await window.electronAPI.addTagToNote(noteId, tagId);
@@ -269,14 +279,37 @@ export const useNoteStore = defineStore('note', () => {
         }
     }
 
+    async function removeTagFromAllNote(tagId:string) {
+        state.value.notes = state.value.notes.map(note => {
+            if (note.tags.includes(tagId)) {
+                note.tags = note.tags.filter(id => id !== tagId);
+                note.updatedAt = new Date().toISOString();
+            }
+            return note;
+        });
+    }
+
     // 获取过滤后的便签
     function filteredNotes() {
         const query = state.value.searchQuery.toLowerCase();
         const selectedTag = tagStore.selectedTag;
+        const currentFilterType = state.value.filterType;
+        
         return activeNotes.value.filter(note => {
-            if (selectedTag && !note.tags.includes(selectedTag)) {
+            // 按过滤类型过滤
+            if (currentFilterType === 'pinned' && !note.pinned) {
+                return false;
+            }
+            if (currentFilterType === 'star' && !note.star) {
+                return false;
+            }
+            
+            // 按标签过滤
+            if (currentFilterType ==='title' && selectedTag && !note.tags.includes(selectedTag)) {
                 return false; // 如果有选中的标签，且便签不包含该标签，则过滤掉
             }
+            
+            // 按搜索查询过滤
             if (query) {
                 const titleMatch = note.title.toLowerCase().includes(query);
                 const contentMatch = note.content.toLowerCase().includes(query);
@@ -286,17 +319,16 @@ export const useNoteStore = defineStore('note', () => {
                     return tag && tag.name.toLowerCase().includes(query);
                 });
                 return titleMatch || contentMatch || tagMatch;
-
             }
+            
             return true; // 如果没有搜索查询，则返回所有便签
         });
-
     }
     async function moveToTrash(noteId: string) {
         const index = state.value.notes.findIndex(n => n.id === noteId);
         if (index !== -1) {
 
-            updateNote(noteId, { deleted: true, deletedAt: new Date().toISOString(), originalPosition: index });
+            updateNote(noteId, { deleted: true, deletedAt: new Date().toISOString(), originalPosition: index },false);
         }
     }
 
@@ -313,7 +345,7 @@ export const useNoteStore = defineStore('note', () => {
             };
 
             // 更新数据库
-            const success = await updateNote(noteId, restoredNote);
+            const success = await updateNote(noteId, restoredNote,false);
             if (success) {
                 state.value.notes.splice(noteIndex, 1);
 
@@ -370,20 +402,24 @@ export const useNoteStore = defineStore('note', () => {
         notes,
         pinnedNotes,
         searchQuery,
+        filterType,
         activeNotes,
         trashNotes,
         trashConfig,
         getNoteById,
         setNotes,
         setSearchQuery,
+        setFilterType,
         addNote,
         updateNote,
         removeNote,
         addTagToNote,
         removeTagFromNote,
+        removeTagFromAllNote,
         filteredNotes,
         loadNotes,
         togglePinNote,
+        toggleStarNote,
 
         moveToTrash,
         restoreFromTrash,

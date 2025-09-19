@@ -14,6 +14,14 @@
           <li @click="createNote()">
             <span class="icon">📝</span> {{ $t('newNoteTitle') }}
           </li>
+          <li @click="showPinned()">
+            <span class="icon">📌</span>
+            {{ $t('pinned') }}
+          </li>
+          <li @click="showFavorites()">
+            <span class="icon">⭐</span>
+            {{ $t('star') }} 
+          </li>
           <li @click="showTrash()">
             <span class="icon">
               🗑️
@@ -26,13 +34,13 @@
         </ul>
       </div>
 
-      <div class="sidebar-section" style="height: 70%; overflow-y: auto;">
+      <div class="sidebar-section tags_section">
         <h3>{{ $t('tagclass') }}</h3>
         <ul class="sidebar-menu">
           <li @click="showAllNote(null)">
             <span class="icon">📋</span> {{ $t('allnote') }}
           </li>
-          <li v-for="tag in tagStore.tags" :key="tag.id" @click="showAllNote(tag.id)">
+          <li v-for="tag in tagStore.tags" :key="tag.id" @click="showAllNote(tag.id)" @contextmenu="handleContextMenu($event,tag.id)">
             <span class="tag-color" :style="{ backgroundColor: tag.color }"></span>
             {{ tag.name }}
           </li>
@@ -48,15 +56,16 @@
       </div>
     </div>
   </div>
-   <TagManager v-model="showTagManager"/>
+  <TagManager v-model="showTagManager" />
 </template>
 
 <script setup lang="ts">
-import { useTagStore, useNoteStore } from '../store/store';
+import { useTagStore, useNoteStore, useConfigStore } from '../store/store';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import TagManager from './TagManager.vue';
+import ContextMenu from '@imengyu/vue3-context-menu'
 const { t } = useI18n();
 const showTagManager = ref(false);
 const router = useRouter();
@@ -82,17 +91,52 @@ function showTrash() {
 }
 
 // 显示所有笔记
-function showAllNote(tagId:string|null){
+function showAllNote(tagId: string | null) {
+  noteStore.setFilterType('title');
   tagStore.selectTag(tagId);
+  router.push({ name: 'home' });
+}
+
+//显示置顶标签
+function showPinned(){
+  noteStore.setFilterType('pinned');
+  tagStore.selectTag(null);
   router.push({name:'home'});
 }
 
-function ShowTagManager(){
-    showTagManager.value = true;
+//显示收藏标签
+function showFavorites(){
+  noteStore.setFilterType('star');
+  tagStore.selectTag(null);
+  router.push({name:'home'});
+} 
+
+function ShowTagManager() {
+  showTagManager.value = true;
 }
 
 function showabout() {
   window.electronAPI.showAbout();
+}
+
+
+function handleContextMenu(e: MouseEvent,tagId:string) {
+  e.preventDefault();
+  ContextMenu.showContextMenu({
+    x:e.clientX,
+    y:e.clientY,
+    theme:document.body.getAttribute('data-theme') === 'light' ? `${useConfigStore().config.contextmenutheme}` : `${useConfigStore().config.contextmenutheme} dark`,
+    items:[{
+      label: t('rename')
+    },{
+      label: t('delete'),
+      onClick:() => {
+        if(confirm(t('deleteConfirm'))){
+          console.log(tagId);
+        }
+      }
+    }]
+  })
 }
 
 </script>
@@ -154,39 +198,9 @@ function showabout() {
 
 .sidebar-content {
   flex: 1;
-  overflow-y: auto;
   padding: 15px 0;
-  /* 滚动条样式 - 默认隐藏 */
-  scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
 }
 
-.sidebar:hover .sidebar-content{
-  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
-}
-
-.sidebar-content::-webkit-scrollbar{
-  width: 6px;
-  background-color: transparent;
-}
-
-.sidebar:hover .sidebar-content::-webkit-scrollbar{
-  background-color: var(--scrollbar-track);
-}
-
-.sidebar-content::-webkit-scrollbar-thumb {
-  background-color: transparent;
-  border-radius: 3px;
-}
-
-.sidebar:hover .sidebar-content::-webkit-scrollbar-thumb {
-  background-color: var(--scrollbar-thumb);
-  border: 1px solid var(--scrollbar-track);
-}
-
-.sidebar-content::-webkit-scrollbar-thumb:hover {
-  background-color: var(--scrollbar-thumb-hover);
-}
 
 .sidebar-section {
   margin-bottom: 25px;
@@ -200,6 +214,41 @@ function showabout() {
   letter-spacing: 1px;
   color: var(--menu-title-background);
 }
+
+.tags_section {
+  height: 70%;
+  overflow-y: auto;
+   scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.sidebar:hover .tags_section {
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+.tags_section::-webkit-scrollbar {
+  width: 6px;
+  background-color: transparent;
+}
+
+.sidebar:hover .tags_section::-webkit-scrollbar {
+  background-color: var(--scrollbar-track);
+}
+
+.tags_section::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 3px;
+}
+
+.tags_section:hover::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border: 1px solid var(--scrollbar-track);
+}
+
+.tags_section::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover);
+}
+
 
 .sidebar-menu {
   list-style: none;

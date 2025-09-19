@@ -1,7 +1,14 @@
 <template>
   <div class="note-list">
     <div class="list-header">
-      <h2 v-if="selectedTagName !== null">
+      <!-- 根据过滤状态显示不同的标题 -->
+      <h2 v-if="noteStore.filterType === 'pinned'">
+        {{ $t('pinned') }}
+      </h2>
+      <h2 v-else-if="noteStore.filterType === 'star'">
+        {{ $t('star') }}
+      </h2>
+      <h2 v-else-if="selectedTagName !== null">
         {{ selectedTagName }}
       </h2>
       <h2 v-else>
@@ -75,6 +82,7 @@ function sortNotes(notes: Note[], sortType: SortType): Note[] {
       return sortedNotes.sort((a, b) => a.title.localeCompare(b.title));
     case 'title-desc':
       return sortedNotes.sort((a, b) => b.title.localeCompare(a.title));
+    
     default:
       return sortedNotes;
   }

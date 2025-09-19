@@ -30,6 +30,7 @@ class Database {
                 updatedAt TEXT NOT NULL,
                 deleted INTEGER DEFAULT 0,
                 pinned INTEGER DEFAULT 0,
+                star INTEGER DEFAULT 0,
                 deletedAt TEXT,
                 originalPosition INTEGER,
                 isEncrypted INTEGER DEFAULT 0,
@@ -64,24 +65,32 @@ class Database {
 
 
     }
-    
+
     // 检查并添加加密字段（如果不存在）
     private addEncryptionFieldsIfNotExists() {
         try {
             // 检查是否已经有isEncrypted字段
             const tableInfo = this.db.prepare("PRAGMA table_info(notes)").all() as { name: string }[];
             const hasEncryptionFields = tableInfo.some(column => column.name === 'isEncrypted');
-            
+            const hasStarField = tableInfo.some(column => column.name === 'star');
+
+            // 添加star字段
+            if (!hasStarField) {
+                console.log('正在添加star字段...');
+                this.db.exec(`ALTER TABLE notes ADD COLUMN star INTEGER DEFAULT 0`);
+                console.log('star字段添加完成');
+            }
+
             if (!hasEncryptionFields) {
                 console.log('正在添加加密相关字段...');
-                
+
                 // 添加加密相关字段
                 this.db.exec(`ALTER TABLE notes ADD COLUMN isEncrypted INTEGER DEFAULT 0`);
                 this.db.exec(`ALTER TABLE notes ADD COLUMN encryptedContent TEXT`);
                 this.db.exec(`ALTER TABLE notes ADD COLUMN salt TEXT`);
                 this.db.exec(`ALTER TABLE notes ADD COLUMN iv TEXT`);
                 this.db.exec(`ALTER TABLE notes ADD COLUMN algorithm TEXT`);
-                
+
                 console.log('加密相关字段添加完成');
             }
         } catch (error) {
@@ -125,9 +134,21 @@ class Database {
     public deleteTag(tagId: string): Promise<boolean> {
         return new Promise((resolve) => {
             try {
-                const stmt = this.db.prepare('DELETE FROM tags WHERE id = ?');
-                stmt.run(tagId);
-                resolve(true);
+
+                this.db.transaction(() => {
+
+                    const deleteTagRelationsStmt = this.db.prepare(
+                        'DELETE FROM note_tags WHERE tag_id = ?'
+                    );
+                    deleteTagRelationsStmt.run(tagId);
+
+
+                    const deleteTagStmt = this.db.prepare('DELETE FROM tags WHERE id = ?');
+                    deleteTagStmt.run(tagId);
+                    resolve(true);
+                })();
+
+
             } catch (error) {
                 console.error('Error deleting tag:', error);
                 resolve(false);
@@ -202,7 +223,7 @@ class Database {
             try {
                 // 保存便签基本信息（包括加密相关字段）
                 const stmt = this.db.prepare(
-                    'INSERT OR REPLACE INTO notes (id, title, content, color, createdAt, updatedAt, deleted, pinned, deletedAt, originalPosition, isEncrypted, encryptedContent, salt, iv, algorithm) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+                    'INSERT OR REPLACE INTO notes (id, title, content, color, createdAt, updatedAt, deleted, pinned,star, deletedAt, originalPosition, isEncrypted, encryptedContent, salt, iv, algorithm) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?)'
                 );
                 stmt.run(
                     note.id,
@@ -213,6 +234,7 @@ class Database {
                     note.updatedAt,
                     note.deleted ? 1 : 0,
                     note.pinned ? 1 : 0,
+                    note.star ? 1 : 0,
                     note.deletedAt,
                     note.originalPosition,
                     note.isEncrypted ? 1 : 0,
@@ -245,7 +267,7 @@ class Database {
         return new Promise((resolve) => {
             try {
                 const stmt = this.db.prepare(
-                    'UPDATE notes SET title = ?, content = ?, color = ?, updatedAt = ?, deleted = ?, pinned = ?, deletedAt = ?, originalPosition = ?, isEncrypted = ?, encryptedContent = ?, salt = ?, iv = ?, algorithm = ? WHERE id = ?'
+                    'UPDATE notes SET title = ?, content = ?, color = ?, updatedAt = ?, deleted = ?, pinned = ?, star=? ,deletedAt = ?, originalPosition = ?, isEncrypted = ?, encryptedContent = ?, salt = ?, iv = ?, algorithm = ? WHERE id = ?'
                 );
                 console.log('Updating note with data:', note);
                 stmt.run(
@@ -255,6 +277,7 @@ class Database {
                     note.updatedAt || new Date().toISOString(),
                     note.deleted ? 1 : 0,
                     note.pinned ? 1 : 0,
+                    note.star ? 1 : 0,
                     note.deletedAt,
                     note.originalPosition,
                     note.isEncrypted ? 1 : 0,

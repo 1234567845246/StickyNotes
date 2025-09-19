@@ -3,15 +3,16 @@ export const defaultconfig: Config = {
   language: 'zh',
   retentionDays: 30,
   autoClean: true,
+  contextmenutheme: 'default'
 }
 
 
 export enum EncryptionAlgorithm {
-    AES_256_GCM = 'aes-256-gcm',
-    AES_256_CBC = 'aes-256-cbc',
-    AES_256_CTR = 'aes-256-ctr',
-    AES_256_CFB = 'aes-256-cfb',
-    AES_256_OFB = 'aes-256-ofb'
+  AES_256_GCM = 'aes-256-gcm',
+  AES_256_CBC = 'aes-256-cbc',
+  AES_256_CTR = 'aes-256-ctr',
+  AES_256_CFB = 'aes-256-cfb',
+  AES_256_OFB = 'aes-256-ofb'
 }
 
 
@@ -28,8 +29,10 @@ export interface TrashConfig {
 export interface Config {
   theme: Theme;
   language: Language;
+  contextmenutheme: 'default' | 'flat' | 'win10' | 'mac';
   retentionDays: number; // 保留天数（默认30天）
   autoClean: boolean;    // 是否自动清理
+
 
 }
 export interface Tag {
@@ -76,6 +79,7 @@ export interface Note {
   title: string;
   tags: string[];
   pinned: boolean;
+  star: boolean;
   content: string;
   color: NoteColorType;
   createdAt: string; // 时间戳
@@ -109,6 +113,7 @@ export interface TagState {
 export interface NoteState {
   notes: Note[];
   searchQuery: string; // 搜索查询
+  filterType: 'pinned' | 'star' | 'title'; // 过滤类型
 }
 
 

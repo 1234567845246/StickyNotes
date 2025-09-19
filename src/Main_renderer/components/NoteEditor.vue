@@ -213,6 +213,7 @@ function getInitialNote(): Note {
       color: getRandomColor(),
       tags: [],
       pinned: false,
+      star: false,
       deleted: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -232,6 +233,7 @@ function getInitialNote(): Note {
         color: getRandomColor(),
         tags: [],
         pinned: false,
+        star: false,
         deleted: false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
